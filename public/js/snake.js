@@ -16,6 +16,7 @@ Snake.prototype.addBall = function(){
     x: this.body[this.body.length-1].x,
     y: this.body[this.body.length-1].y + 2 * this.assets.snakeBallRadius,
   });
+  this.draw();
 }
 Snake.prototype.addBallToBeginning = function(){
   this.body.unshift({

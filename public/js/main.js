@@ -24,7 +24,6 @@ function setTest(){
   {
     snake.addBall();
   }
-  snake.draw();
 }
 
 function clearIntervalIfOtherKeyPressed(key)
@@ -71,6 +70,11 @@ window.onkeydown = function(e){
   else if(e.key === " ")
   {
     clearIntervalIfOtherKeyPressed('left');
+  }
+  else if(e.key === 'a')
+  {
+    //add ball
+    snake.addBall();
   }
 }
 window.onkeyup = function(e){
