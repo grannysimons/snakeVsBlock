@@ -19,7 +19,7 @@ window.onload = function(){
 }
 
 function setTest(){
-  var BALLS_TEST = 2;
+  var BALLS_TEST = 6;
   for(var i=0; i<BALLS_TEST; i++)
   {
     snake.addBall();
@@ -31,6 +31,8 @@ function clearIntervalIfOtherKeyPressed(key)
 {
   if(lastKeyPressed != key)
   {
+    assets.resetVerticalIncrement();
+    assets.intervalTicks = 0;
     clearInterval(idInterval);
     idInterval = undefined;
   }
@@ -50,6 +52,7 @@ window.onkeydown = function(e){
       snake.moveRight();
       game.clearCanvas();
       snake.draw();
+      assets.intervalTicks++;
     }, assets.snakeCalculationPeriod);
     setKeyPressed('right');
   }
@@ -61,20 +64,30 @@ window.onkeydown = function(e){
       snake.moveLeft();
       game.clearCanvas();
       snake.draw();
+      assets.intervalTicks++;
     }, assets.snakeCalculationPeriod);
     setKeyPressed('left');
+  }
+  else if(e.key === " ")
+  {
+    clearIntervalIfOtherKeyPressed('left');
   }
 }
 window.onkeyup = function(e){
   console.log('key Up');
-  if(idInterval)
+  if (e.key != " ")
   {
-    clearInterval(idInterval);
-    idInterval = undefined;
+    if(idInterval)
+    {
+      clearInterval(idInterval);
+      idInterval = undefined;
+      assets.resetVerticalIncrement();
+      assets.intervalTicks = 0;
+    }
+    if (!idInterval) idInterval = setInterval(function(){
+      snake.moveForward();
+      game.clearCanvas();
+      snake.draw();
+    }, assets.snakeCalculationPeriod);
   }
-  if (!idInterval) idInterval = setInterval(function(){
-    snake.moveForward();
-    game.clearCanvas();
-    snake.draw();
-  }, assets.snakeCalculationPeriod);
 }

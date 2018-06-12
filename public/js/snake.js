@@ -75,5 +75,5 @@ Snake.prototype.drawBall = function(ball){
 }
 Snake.prototype._clearBall = function(ball){
   var radius = this.assets.snakeBallRadius;
-  this.ctx.clearRect(ball.x-radius, ball.y-radius, 2 * radius, 2 * radius);
+  this.ctx.clearRect(ball.x-radius-0.3, ball.y-radius-0.3, 2 * radius+0.6, 2 * radius+0.6);
 }
