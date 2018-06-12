@@ -10,7 +10,7 @@ Game.prototype.init = function(){
 }
 
 Game.prototype.clearCanvas = function(){
-  this.ctx.clearRect(0, 0, this.ctx.width, this.ctx.height);
+  // this.ctx.clearRect(0, 0, this.ctx.width, this.ctx.height);
 }
 
 Game.prototype.draw = function(){

@@ -2,7 +2,7 @@ function Assets(){
   this.snakeCalculationPeriod = 100;
   this.snakeDistanceToLow = 100;
   this.snakeBallRadius = 5;
-  this.snakeVerticalIncrementTurn = 2 * this.snakeBallRadius - 3;
+  this.snakeVerticalIncrementTurn = 2 * this.snakeBallRadius - 7;
   this.snakeColorNormal = "yellow";
   this.snakeMovementInterval = 20;
   this.snakeIncrementBalls = 10;
