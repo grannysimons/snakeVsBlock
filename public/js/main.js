@@ -1,59 +1,57 @@
 var game;
-var idIntervals = [];
+var idInterval;
+//alias
+var assets;
+var snake;
+
 window.onload = function(){
   game = new Game();
   game.init();
 
+  //alias assignment
+  assets = game.assets;
+  snake = game.snake;
+
   //prova
-  game.snake.addBall();
-  game.init();
-  game.snake.addBall();
-  game.init();
-  game.snake.addBall();
-  game.init();
-  game.snake.addBall();
-  game.init();
-  game.snake.addBall();
-  game.init();
-  game.snake.addBall();
-  game.init();
-  game.snake.addBall();
-  game.init();
-  game.snake.addBall();
-  game.init();
-  game.snake.addBall();
-  game.init();
-  game.snake.addBall();
-  game.init();
+  var BALLS_TEST = 6;
+  for(var i=0; i<BALLS_TEST; i++)
+  {
+    snake.addBall();
+  }
+  snake.draw();
 }
 
 
 window.onkeydown = function(e){
   if(e.key === "ArrowRight")
   {
-    idIntervals.push(setInterval(function(){
-      snakeContinuousMov('right');
-    }, 70));
+    if (!idInterval) idInterval = setInterval(function(){
+      console.log("setInterval");
+      snake.moveRight();
+      game.clearCanvas();
+      snake.draw();
+    }, assets.snakeCalculationPeriod);
   }
   else if(e.key === "ArrowLeft")
   {
-    idIntervals.push(setInterval(function(){
-      snakeContinuousMov('left');
-    }, 70));
+    if (!idInterval) idInterval = setInterval(function(){
+      console.log("setInterval");
+      snake.moveLeft();
+      game.clearCanvas();
+      snake.draw();
+    }, assets.snakeCalculationPeriod);
   }
 }
 window.onkeyup = function(e){
   if(e.key === "ArrowRight")
   {
-    idIntervals.forEach(function(idInterval){
-      clearInterval(idInterval);
-    });
+    clearInterval(idInterval);
+    idInterval = undefined;
   }
   else if(e.key === "ArrowLeft")
   {
-    idIntervals.forEach(function(idInterval){
-      clearInterval(idInterval);
-    });
+    clearInterval(idInterval);
+    idInterval = undefined;
   }
 }
 
