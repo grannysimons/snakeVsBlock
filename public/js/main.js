@@ -49,7 +49,7 @@ window.onkeydown = function(e){
     clearIntervalIfOtherKeyPressed('right');
     if (!idInterval) idInterval = setInterval(function(){
       snake.moveRight();
-      game.clearCanvas();
+      // snake.keepSnakeQuiet();
       snake.draw();
       assets.intervalTicks++;
     }, assets.snakeCalculationPeriod);
@@ -61,7 +61,7 @@ window.onkeydown = function(e){
     clearIntervalIfOtherKeyPressed('left');
     if (!idInterval) idInterval = setInterval(function(){
       snake.moveLeft();
-      game.clearCanvas();
+      // snake.keepSnakeQuiet();
       snake.draw();
       assets.intervalTicks++;
     }, assets.snakeCalculationPeriod);
@@ -69,11 +69,13 @@ window.onkeydown = function(e){
   }
   else if(e.key === " ")
   {
+    // snake.keepSnakeQuiet();
     clearIntervalIfOtherKeyPressed('left');
   }
   else if(e.key === 'a')
   {
     //add ball
+    // snake.keepSnakeQuiet();
     snake.addBall();
   }
 }
@@ -92,6 +94,7 @@ window.onkeyup = function(e){
       snake.moveForward();
       game.clearCanvas();
       snake.draw();
+      assets.intervalTicks++;
     }, assets.snakeCalculationPeriod);
   }
 }

@@ -60,8 +60,16 @@ Snake.prototype.moveLeft = function(){
     this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn;
   }
 }
+Snake.prototype.keepSnakeQuiet = function(){
+  // var snakeY = this.body[0].y;
+  // var amountToSubstract = Math.abs(snakeY - this.ctx.canvas.height + this.assets.snakeDistanceToLow);
+  // this.body.forEach(function(ball){
+  //   ball.y += amountToSubstract;
+  // });
+}
 
 Snake.prototype.draw = function(){
+  // this.keepSnakeQuiet();
   this.body.forEach(function(ball){
     this.drawBall(ball);
   }.bind(this));
