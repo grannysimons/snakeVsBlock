@@ -6,6 +6,7 @@ function Snake(ctx, assets){
     y: this.ctx.canvas.height - this.assets.snakeDistanceToLow, //400, //this.ctx.height-this.assets.snakeDistanceToLow
   }];
   this.score = 0;
+  this.animationInterval = undefined;
 }
 Snake.prototype.hasCollided = function(){}
 Snake.prototype.looseBall = function(){}
