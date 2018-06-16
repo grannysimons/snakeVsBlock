@@ -13,6 +13,7 @@ function Game(){
   this.idInterval = undefined;
   this.lastKeyPressed = undefined;
   this.scoreBallsInterval = undefined;
+  this.blocksInterval = undefined;
 }
 Game.prototype.init = function(){
   this.snake.startLoop(this._update.bind(this));
@@ -48,6 +49,7 @@ Game.prototype.init = function(){
   }.bind(this));
 
   this.generateScoreBalls();
+  this.generateBlocks();
   this.draw();
 }
 Game.prototype.generateScoreBalls = function(){
@@ -69,11 +71,14 @@ Game.prototype.checkCollision = function(){
   this.scoreBalls.forEach(function(scoreBall, index){
     if(this.snake.hasCollided(scoreBall))
     {
-      console.log("has collided!!");
       this.snake.score += scoreBall.points;
       this.scoreBalls.splice(index,1);
+      for(var i=0; i<scoreBall.points; i++)
+      {
+        this.snake.addBall();
+      }
     }
-  }.bind(this));
+  }.bind(this));  
 }
 Game.prototype.printScore = function(){
   this.ctx.font="30px Arial";
@@ -88,15 +93,33 @@ Game.prototype.draw = function(){
     scoreBall.recalculatePosition();
     scoreBall.draw();
   });
+  this.blocks.forEach(function(block){
+    block.recalculatePosition();
+    block.draw();
+  });
   this.printScore();
 }
 Game.prototype.generateBall = function(){}
-Game.prototype.generateBlocks = function(){}
+Game.prototype.generateBlocks = function(){
+  for(var i=0; i<this.assets.maxBlocks; i++)
+  {
+    var block = new Block(this.assets, this.ctx);
+    block.setFirstBlock();
+    this.blocks.push(block);
+  }
+  this.blocksInterval = setInterval(function(){
+    if (this.isIntervalPaused()) return;
+    for(var i=0; i<this.assets.maxBlocks; i++)
+    {
+      this.blocks.push(new Block(this.assets, this.ctx));
+    }
+  }.bind(this),this.assets.addingBlocksPeriod);
+}
 Game.prototype.destroyBlock = function(blockObj){}
 Game.prototype.generateWall = function(){}
 Game.prototype.finish = function(){}
 Game.prototype.setTest = function(){
-  var BALLS_TEST = 20;
+  var BALLS_TEST = 1;
   for(var i=0; i<BALLS_TEST; i++)
   {
     this.snake.addBall();

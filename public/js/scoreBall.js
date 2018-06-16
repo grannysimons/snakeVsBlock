@@ -1,7 +1,7 @@
 function Scoreball(assets, ctx){
   this.assets = assets;
   this.ctx = ctx;
-  this.points = this.assets.scores[Math.floor(Math.random() * this.assets.scores.length)];
+  this.points = this.assets.ballScores[Math.floor(Math.random() * this.assets.ballScores.length)];
   this.x = Math.random() * this.ctx.width;
   this.y = (Math.random() * this.ctx.height)%(this.ctx.height - this.assets.snakeDistanceToLow) - this.ctx.height;
 }

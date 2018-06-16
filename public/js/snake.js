@@ -32,7 +32,10 @@ Snake.prototype.addBall = function(){
     x: this.body[this.body.length-1].x,
     y: this.body[this.body.length-1].y + 2 * this.assets.snakeBallRadius,
   });
-  this.draw();
+  // this.draw();
+}
+Snake.prototype.deleteBall = function(){
+  this.body.pop();
 }
 Snake.prototype.addBallToBeginning = function(){
   this.body.unshift({
@@ -41,12 +44,12 @@ Snake.prototype.addBallToBeginning = function(){
   });
 }
 Snake.prototype.move = function (){
-  this.body.pop();
   //afegir una bola al principi del this.body amb les característiques de la primera bola
   var firstBall = {
     x: this.body[0].x,
     y: this.body[0].y
   };
+  this.body.pop();
   this.body.unshift(firstBall);
 }
 Snake.prototype.moveForward = function(){

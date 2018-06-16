@@ -18,10 +18,17 @@ function Assets(){
   this.ARROW_LEFT = 1;
   this.SPACEBAR = 2;
   this.A = 3;
-  this.scores = [1,2,3,4,5];
+  this.ballScores = [1,2,3,4,5];
   this.maxScoreBalls = 2;
   this.addingScoreBallsPeriod = 2000;
   this.drawInterval = 5;
+
+  this.blockWidth = 80;
+  this.blockHeight = 60;
+  this.maxBlocks = 1;
+  this.addingBlocksPeriod = 2000;
+  this.maxBlockScores = 30;
+  this.blockColors = ['#9cbca5', '#e3bf81', '#fc7335', '#b12737', '#4f424b'];
 }
 
 Assets.prototype.calculateVerticalIncrement = function(){
