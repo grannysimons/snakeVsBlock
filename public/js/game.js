@@ -4,19 +4,15 @@ function Game(){
   this.snake = new Snake(this.ctx, this.assets);
   this.blocks = [];
   this.keys = [];
-  this.idInterval = undefined;
-  this.lastKeyPressed = undefined;
-}
-
-Game.prototype.init = function(){
-  this.snake.draw();
   this.keys[this.assets.ARROW_RIGHT] = false;
   this.keys[this.assets.ARROW_LEFT] = false;
   this.keys[this.assets.SPACEBAR] = false;
-
-  this.snake.animationInterval = setInterval(function(){
-    this.checkKey();
-  }.bind(this), this.assets.snakeMovementInterval);
+  this.idInterval = undefined;
+  this.lastKeyPressed = undefined;
+}
+Game.prototype.init = function(){
+  this.snake.draw();
+  this.snake.startLoop(this._update.bind(this));
 
   window.addEventListener('keydown', function(e){
     switch(e.key)
@@ -32,105 +28,145 @@ Game.prototype.init = function(){
       break;
     }
   }.bind(this));
-  window.addEventListener('keyup', function(e){
-    console.log('key Up');
 
+  window.addEventListener('keyup', function(e){
     for (var i = 0; i<this.keys.length; i++)
     {
       this.keys[i]=false;
     }
-
-    if (e.key != " ")
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft")
     {
-      if(this.idInterval)
-      {
-        clearInterval(this.idInterval);
-        this.idInterval = undefined;
-        this.assets.resetVerticalIncrement();
-        this.assets.intervalTicks = 0;
-      }
-      if (!this.idInterval) this.idInterval = setInterval(function(){
-        this.snake.moveForward();
-        this.clearCanvas();
-        this.snake.draw();
-        this.assets.intervalTicks++;
-      }.bind(this), this.assets.snakeCalculationPeriod);
+      this.assets.intervalTicks = 0;
+      this.assets.resetVerticalIncrement();
+      this.snake.moveForward();
+      // this.clearCanvas();
+      this.snake.draw();
     }
   }.bind(this));
 }
-
-Game.prototype.clearCanvas = function(){}
+// Game.prototype.clearCanvas = function(){}
 Game.prototype.draw = function(){}
 Game.prototype.generateBall = function(){}
 Game.prototype.generateBlocks = function(){}
 Game.prototype.destroyBlock = function(blockObj){}
 Game.prototype.generateWall = function(){}
 Game.prototype.finish = function(){}
-
 Game.prototype.setTest = function(){
-  var BALLS_TEST = 6;
+  var BALLS_TEST = 20;
   for(var i=0; i<BALLS_TEST; i++)
   {
     this.snake.addBall();
   }
 }
-
-Game.prototype.clearIntervalIfOtherKeyPressed = function(key)
+Game.prototype.pauseInterval = function(){
+  this.snake.isIntervalPaused = true;
+}
+Game.prototype.resumeInterval = function(){
+  this.snake.isIntervalPaused = false;
+}
+Game.prototype.isIntervalPaused = function(){
+  return this.snake.isIntervalPaused;
+}
+Game.prototype.adaptVerticalIncrement = function(key)
 {
   if(this.lastKeyPressed != key)
   {
     this.assets.resetVerticalIncrement();
-    this.assets.intervalTicks = 0;
-    clearInterval(this.idInterval);
-    this.idInterval = undefined;
   }
 }
-
+Game.prototype.adaptVerticalIncrementFirstPositions = function(key)
+{
+  if(this.lastKeyPressed != key)
+  {
+    this.assets.resetVerticalIncrement_FP();
+  }
+}
 Game.prototype.setKeyPressed = function(key)
 {
   this.lastKeyPressed = key;
 }
-
-
-Game.prototype.checkKey = function()
+Game.prototype._update = function()
 {
-  this.keys.forEach(function(value, key){
-    if(value === true)
+  //first check if paused
+  if(this._anyKeyPressed() && this.keys[this.assets.SPACEBAR] === true)
+  {
+    this.adaptVerticalIncrement('space');
+    if(this.isIntervalPaused()) this.resumeInterval();
+    else this.pauseInterval();
+  }
+  if(!this.isIntervalPaused())
+  {
+    if(this._anyKeyPressed() === false)
     {
-      switch(key)
+      if (this.assets.intervalTicks < this.assets.firstIntervalTicks)
       {
-        case this.assets.ARROW_RIGHT:
-          console.log('right');
-          this.clearIntervalIfOtherKeyPressed('right');
-          if (!this.idInterval) this.idInterval = setInterval(function(){
-            this.snake.moveRight();
-            // snake.keepSnakeQuiet();
-            this.snake.draw();
-            this.assets.intervalTicks++;
-          }.bind(this), this.assets.snakeCalculationPeriod);
-          this.setKeyPressed('right');
-        break;
-        case this.assets.ARROW_LEFT:
-          console.log('left');
-          this.clearIntervalIfOtherKeyPressed('left');
-          if (!this.idInterval) this.idInterval = setInterval(function(){
-            this.snake.moveLeft();
-            // snake.keepSnakeQuiet();
-            this.snake.draw();
-            this.assets.intervalTicks++;
-          }.bind(this), this.assets.snakeCalculationPeriod);
-          this.setKeyPressed('left');
-        break;
-        case this.assets.SPACEBAR:
-          // snake.keepSnakeQuiet();
-          this.clearIntervalIfOtherKeyPressed('left');
-        break;
-        case this.assets.A:
-          //add ball
-          //snake.keepSnakeQuiet();
-          this.snake.addBall();
-        break;
+        this.snake.moveForwardFirstPositions(this.lastKeyPressed);
       }
+      else
+      {
+        this.snake.moveForward();
+      }
+      this.snake.draw();
+      this.assets.intervalTicks++;
     }
-  }.bind(this));
+    else
+    {
+      this.keys.forEach(function(value, key){
+        if(value === true)
+        {
+          switch(key)
+          {
+            case this.assets.ARROW_RIGHT:
+              if (this.assets.intervalTicks < this.assets.firstIntervalTicks)
+              {
+                this.adaptVerticalIncrementFirstPositions('right');
+                this.snake.moveRightFirstPositions();
+                this.snake.draw();
+              }
+              else
+              {
+                this.adaptVerticalIncrement('right');
+                this.snake.moveRight();
+                this.snake.draw();
+              }
+              this.setKeyPressed('right');
+              this.assets.intervalTicks++;
+            break;
+            case this.assets.ARROW_LEFT:
+              if (this.assets.intervalTicks < this.assets.firstIntervalTicks)
+              {
+                this.adaptVerticalIncrementFirstPositions('left');
+                this.snake.moveLeftFirstPositions();
+                this.snake.draw();
+              }
+              else 
+              {
+                this.adaptVerticalIncrement('left');
+                this.snake.moveLeft();
+                this.snake.draw();
+              }
+              this.setKeyPressed('left');
+              this.assets.intervalTicks++;
+            break;
+            case this.assets.SPACEBAR:
+              // snake.keepSnakeQuiet();
+            
+            break;
+            case this.assets.A:
+              //add ball
+              //snake.keepSnakeQuiet();
+              this.snake.addBall();
+            break;
+          }
+        }
+      }.bind(this));
+    }
+  }
+}
+Game.prototype._anyKeyPressed = function(){
+  var anyKeyPressed = false;
+  this.keys.forEach(function(value){
+    if (value === true) anyKeyPressed = true;
+  });
+  return anyKeyPressed;
 }
