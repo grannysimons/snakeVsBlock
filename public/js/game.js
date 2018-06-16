@@ -1,6 +1,8 @@
 function Game(){
   this.assets = new Assets();
   this.ctx = document.getElementById('canvas').getContext('2d');
+  this.ctx.width = 800;
+  this.ctx.height = 600;
   this.snake = new Snake(this.ctx, this.assets);
   this.blocks = [];
   this.keys = [];
@@ -11,7 +13,6 @@ function Game(){
   this.lastKeyPressed = undefined;
 }
 Game.prototype.init = function(){
-  this.snake.draw();
   this.snake.startLoop(this._update.bind(this));
 
   window.addEventListener('keydown', function(e){
@@ -43,9 +44,14 @@ Game.prototype.init = function(){
       this.snake.draw();
     }
   }.bind(this));
+
+  this.draw();
 }
 // Game.prototype.clearCanvas = function(){}
-Game.prototype.draw = function(){}
+Game.prototype.draw = function(){
+  this.ctx.clearRect(0,0,this.ctx.width, this.ctx.height);
+  this.snake.draw();
+}
 Game.prototype.generateBall = function(){}
 Game.prototype.generateBlocks = function(){}
 Game.prototype.destroyBlock = function(blockObj){}
@@ -106,7 +112,7 @@ Game.prototype._update = function()
       {
         this.snake.moveForward();
       }
-      this.snake.draw();
+      // this.snake.draw();
       this.assets.intervalTicks++;
     }
     else
@@ -121,13 +127,13 @@ Game.prototype._update = function()
               {
                 this.adaptVerticalIncrementFirstPositions('right');
                 this.snake.moveRightFirstPositions();
-                this.snake.draw();
+                // this.snake.draw();
               }
               else
               {
                 this.adaptVerticalIncrement('right');
                 this.snake.moveRight();
-                this.snake.draw();
+                // this.snake.draw();
               }
               this.setKeyPressed('right');
               this.assets.intervalTicks++;
@@ -137,13 +143,13 @@ Game.prototype._update = function()
               {
                 this.adaptVerticalIncrementFirstPositions('left');
                 this.snake.moveLeftFirstPositions();
-                this.snake.draw();
+                // this.snake.draw();
               }
               else 
               {
                 this.adaptVerticalIncrement('left');
                 this.snake.moveLeft();
-                this.snake.draw();
+                // this.snake.draw();
               }
               this.setKeyPressed('left');
               this.assets.intervalTicks++;
@@ -162,6 +168,7 @@ Game.prototype._update = function()
       }.bind(this));
     }
   }
+  this.draw();
 }
 Game.prototype._anyKeyPressed = function(){
   var anyKeyPressed = false;

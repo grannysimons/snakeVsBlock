@@ -1,6 +1,6 @@
 function Assets(){
   this.snakeCalculationPeriod = 100;
-  this.snakeDistanceToLow = 50;
+  this.snakeDistanceToLow = 200;
   this.snakeBallRadius = 7;
   this.snakeVerticalIncrementTurnInitial = 2 * this.snakeBallRadius - 3;
   this.snakeVerticalIncrementTurn = this.snakeVerticalIncrementTurnInitial;

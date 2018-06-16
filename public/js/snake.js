@@ -2,8 +2,8 @@ function Snake(ctx, assets){
   this.assets = assets;
   this.ctx = ctx;
   this.body = [{
-    x: this.ctx.canvas.width * 0.5, //200, //this.ctx.width/2,
-    y: this.ctx.canvas.height - this.assets.snakeDistanceToLow, //400, //this.ctx.height-this.assets.snakeDistanceToLow
+    x: this.ctx.width * 0.5, //200, //this.ctx.width/2,
+    y: this.ctx.height - this.assets.snakeDistanceToLow, //400, //this.ctx.height-this.assets.snakeDistanceToLow
   }];
   this.score = 0;
   this.animationInterval = undefined;
@@ -34,13 +34,6 @@ Snake.prototype.addBallToBeginning = function(){
   });
 }
 Snake.prototype.move = function (){
-  //baixar-ho tot 2r
-  // this.body.forEach(function(ball){
-  //   ball.y = ball.y + 2 * this.assets.snakeBallRadius;
-  //   this._clearBall(this.body[this.body.length-1]);
-  // }.bind(this));
-  //eliminar ultima bola del this.body
-  this._clearBall(this.body[this.body.length-1]);
   this.body.pop();
   //afegir una bola al principi del this.body amb les característiques de la primera bola
   var firstBall = {
@@ -48,7 +41,6 @@ Snake.prototype.move = function (){
     y: this.body[0].y
   };
   this.body.unshift(firstBall);
-  
 }
 Snake.prototype.moveForward = function(){
   this.move();
@@ -57,6 +49,7 @@ Snake.prototype.moveForward = function(){
     this.body[0].x = this.body[1].x;
     this.body[0].y = this.body[1].y - 2 * this.assets.snakeBallRadius;
   }
+  this.keepSnakeQuiet(- 2 * this.assets.snakeBallRadius);
 }
 Snake.prototype.moveRight = function(){
   this.move();
@@ -65,6 +58,7 @@ Snake.prototype.moveRight = function(){
     this.body[0].x = this.assets.calculateXincrement(this.body[1].x, 'right');
     this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn;
   }
+  this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn);
 }
 Snake.prototype.moveLeft = function(){
   this.move();
@@ -73,6 +67,7 @@ Snake.prototype.moveLeft = function(){
     this.body[0].x = this.assets.calculateXincrement(this.body[1].x, 'left');
     this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn;
   }
+  this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn);
 }
 Snake.prototype.moveRightFirstPositions = function(){
   this.move();
@@ -81,6 +76,7 @@ Snake.prototype.moveRightFirstPositions = function(){
     this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'right');
     this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn_FP;
   }
+  this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn_FP);
 }
 Snake.prototype.moveLeftFirstPositions = function(){
   this.move();
@@ -89,6 +85,7 @@ Snake.prototype.moveLeftFirstPositions = function(){
     this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
     this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn_FP;
   }
+  this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn_FP);
 }
 Snake.prototype.moveForwardFirstPositions = function(lastKey){
   this.move();
@@ -99,20 +96,28 @@ Snake.prototype.moveForwardFirstPositions = function(lastKey){
       this.assets.calculateVerticalIncrement_FP();
       this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
       this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn_FP;
+      this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn_FP);
     }
     else if (lastKey === 'left') 
     {
       this.body[0].x = this.body[1].x + 5;
       this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn - 5;
+      this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn - 5);
     }
     else 
     {
       this.body[0].x = this.body[1].x;
       this.body[0].y = this.body[1].y - 2 * this.assets.snakeBallRadius;
+      this.keepSnakeQuiet(- 2 * this.assets.snakeBallRadius);
     }
   }
 }
-Snake.prototype.keepSnakeQuiet = function(){}
+Snake.prototype.keepSnakeQuiet = function(incY){
+  //baixar-ho tot 2r
+  this.body.forEach(function(ball){
+    ball.y = ball.y - incY;
+  }.bind(this));
+}
 
 Snake.prototype.draw = function(){
   // this.keepSnakeQuiet();
@@ -128,7 +133,7 @@ Snake.prototype.drawBall = function(ball){
   this.ctx.fill();
   this.ctx.closePath();
 }
-Snake.prototype._clearBall = function(ball){
-  var radius = this.assets.snakeBallRadius;
-  this.ctx.clearRect(ball.x-radius-0.3, ball.y-radius-0.3, 2 * radius+0.6, 2 * radius+0.6);
-}
+// Snake.prototype._clearBall = function(ball){
+//   var radius = this.assets.snakeBallRadius;
+//   this.ctx.clearRect(ball.x-radius-0.3, ball.y-radius-0.3, 2 * radius+0.6, 2 * radius+0.6);
+// }
