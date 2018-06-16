@@ -7,6 +7,8 @@ function Assets(){
   this.snakeVerticalIncrementTurnInitial_FP = 2 * this.snakeBallRadius - 5;
   this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurnInitial_FP;
   this.snakeColorNormal = "yellow";
+  this.scoreBallColorNormal = "yellow";
+  this.scoreColor = "lightgray";
   this.snakeMovementInterval = 100;
   this.snakeIncrementBalls = 10;
   this.snakeIncrementNextBall = 0.2;
@@ -16,6 +18,10 @@ function Assets(){
   this.ARROW_LEFT = 1;
   this.SPACEBAR = 2;
   this.A = 3;
+  this.scores = [1,2,3,4,5];
+  this.maxScoreBalls = 2;
+  this.addingScoreBallsPeriod = 2000;
+  this.drawInterval = 5;
 }
 
 Assets.prototype.calculateVerticalIncrement = function(){

@@ -4,6 +4,7 @@ function Game(){
   this.ctx.width = 800;
   this.ctx.height = 600;
   this.snake = new Snake(this.ctx, this.assets);
+  this.scoreBalls = [];
   this.blocks = [];
   this.keys = [];
   this.keys[this.assets.ARROW_RIGHT] = false;
@@ -11,6 +12,7 @@ function Game(){
   this.keys[this.assets.SPACEBAR] = false;
   this.idInterval = undefined;
   this.lastKeyPressed = undefined;
+  this.scoreBallsInterval = undefined;
 }
 Game.prototype.init = function(){
   this.snake.startLoop(this._update.bind(this));
@@ -45,12 +47,48 @@ Game.prototype.init = function(){
     }
   }.bind(this));
 
+  this.generateScoreBalls();
   this.draw();
+}
+Game.prototype.generateScoreBalls = function(){
+  for(var i=0; i<this.assets.maxScoreBalls; i++)
+  {
+    var scoreBall = new Scoreball(this.assets, this.ctx);
+    scoreBall.setFirstScoreball();
+    this.scoreBalls.push(scoreBall);
+  }
+  this.scoreBallsInterval = setInterval(function(){
+    if (this.isIntervalPaused()) return;
+    for(var i=0; i<this.assets.maxScoreBalls; i++)
+    {
+      this.scoreBalls.push(new Scoreball(this.assets, this.ctx));
+    }
+  }.bind(this),this.assets.addingScoreBallsPeriod);
+}
+Game.prototype.checkCollision = function(){
+  this.scoreBalls.forEach(function(scoreBall, index){
+    if(this.snake.hasCollided(scoreBall))
+    {
+      console.log("has collided!!");
+      this.snake.score += scoreBall.points;
+      this.scoreBalls.splice(index,1);
+    }
+  }.bind(this));
+}
+Game.prototype.printScore = function(){
+  this.ctx.font="30px Arial";
+  this.ctx.fillStyle="red";
+  this.ctx.fillText(this.snake.score,this.ctx.width - 70, this.ctx.height - 50);
 }
 // Game.prototype.clearCanvas = function(){}
 Game.prototype.draw = function(){
   this.ctx.clearRect(0,0,this.ctx.width, this.ctx.height);
   this.snake.draw();
+  this.scoreBalls.forEach(function(scoreBall){
+    scoreBall.recalculatePosition();
+    scoreBall.draw();
+  });
+  this.printScore();
 }
 Game.prototype.generateBall = function(){}
 Game.prototype.generateBlocks = function(){}
@@ -167,8 +205,9 @@ Game.prototype._update = function()
         }
       }.bind(this));
     }
+    this.checkCollision();
+    this.draw();
   }
-  this.draw();
 }
 Game.prototype._anyKeyPressed = function(){
   var anyKeyPressed = false;

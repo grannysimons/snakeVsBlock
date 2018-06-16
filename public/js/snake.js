@@ -2,8 +2,8 @@ function Snake(ctx, assets){
   this.assets = assets;
   this.ctx = ctx;
   this.body = [{
-    x: this.ctx.width * 0.5, //200, //this.ctx.width/2,
-    y: this.ctx.height - this.assets.snakeDistanceToLow, //400, //this.ctx.height-this.assets.snakeDistanceToLow
+    x: this.ctx.width * 0.5,
+    y: this.ctx.height - this.assets.snakeDistanceToLow,
   }];
   this.score = 0;
   this.animationInterval = undefined;
@@ -16,7 +16,14 @@ Snake.prototype.startLoop = function(funct){
   }.bind(this), this.assets.snakeMovementInterval);
 }
 
-Snake.prototype.hasCollided = function(){}
+Snake.prototype.hasCollided = function(scoreBall){
+  var head = this.body[0];
+  var radius = this.assets.snakeBallRadius;
+  var verticalCollision = (((head.x - radius < scoreBall.x + radius) && (head.x - radius > scoreBall.x - radius)) 
+  || ((head.x + radius > scoreBall.x - radius) && (head.x + radius < scoreBall.x + radius)));
+  var horizontalCollision = ((head.y - radius > scoreBall.y - radius) && (head.y - radius < scoreBall.y + radius));
+  return verticalCollision && horizontalCollision;
+}
 Snake.prototype.looseBall = function(){}
 Snake.prototype.gameOver = function(){}
 
@@ -133,7 +140,3 @@ Snake.prototype.drawBall = function(ball){
   this.ctx.fill();
   this.ctx.closePath();
 }
-// Snake.prototype._clearBall = function(ball){
-//   var radius = this.assets.snakeBallRadius;
-//   this.ctx.clearRect(ball.x-radius-0.3, ball.y-radius-0.3, 2 * radius+0.6, 2 * radius+0.6);
-// }
