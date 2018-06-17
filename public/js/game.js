@@ -68,8 +68,9 @@ Game.prototype.generateScoreBalls = function(){
   }.bind(this),this.assets.addingScoreBallsPeriod);
 }
 Game.prototype.checkCollision = function(){
+  //collision with balls
   this.scoreBalls.forEach(function(scoreBall, index){
-    if(this.snake.hasCollided(scoreBall))
+    if(this.snake.hasCollidedWithScoreBall(scoreBall))
     {
       this.snake.score += scoreBall.points;
       this.scoreBalls.splice(index,1);
@@ -79,6 +80,27 @@ Game.prototype.checkCollision = function(){
       }
     }
   }.bind(this));  
+  //collision with blocks
+  this.blocks.forEach(function(block, index){
+    if(this.snake.hasCollidedWithBlock(block))
+    {
+      console.log("collision with block");
+      if(block.points < this.snake.score)
+      {
+        this.snake.score -= block.points;
+        this.blocks.splice(index, 1);
+        for(var i=0; i<block.points; i++)
+        {
+          this.snake.deleteBall();
+        }
+      }
+      else
+      {
+        this.pauseInterval();
+        console.log('You lost!');
+      }
+    }
+  }.bind(this));
 }
 Game.prototype.printScore = function(){
   this.ctx.font="30px Arial";
@@ -114,6 +136,11 @@ Game.prototype.generateBlocks = function(){
       this.blocks.push(new Block(this.assets, this.ctx));
     }
   }.bind(this),this.assets.addingBlocksPeriod);
+}
+Game.prototype.deleteBlocksOutOfCanvas = function(){
+  this.blocks.forEach(function(block, index){
+    if (block.y > this.ctx.height) this.blocks.splice(index, 1);
+  }.bind(this));
 }
 Game.prototype.destroyBlock = function(blockObj){}
 Game.prototype.generateWall = function(){}
@@ -229,6 +256,7 @@ Game.prototype._update = function()
       }.bind(this));
     }
     this.checkCollision();
+    this.deleteBlocksOutOfCanvas();
     this.draw();
   }
 }

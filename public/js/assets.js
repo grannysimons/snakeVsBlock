@@ -9,7 +9,7 @@ function Assets(){
   this.snakeColorNormal = "yellow";
   this.scoreBallColorNormal = "yellow";
   this.scoreColor = "lightgray";
-  this.snakeMovementInterval = 100;
+  this.snakeMovementInterval = 60;
   this.snakeIncrementBalls = 10;
   this.snakeIncrementNextBall = 0.2;
   this.intervalTicks = 0;

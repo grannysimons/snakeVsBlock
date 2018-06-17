@@ -16,12 +16,20 @@ Snake.prototype.startLoop = function(funct){
   }.bind(this), this.assets.snakeMovementInterval);
 }
 
-Snake.prototype.hasCollided = function(scoreBall){
+Snake.prototype.hasCollidedWithScoreBall = function(scoreBall){
   var head = this.body[0];
   var radius = this.assets.snakeBallRadius;
   var verticalCollision = (((head.x - radius < scoreBall.x + radius) && (head.x - radius > scoreBall.x - radius)) 
   || ((head.x + radius > scoreBall.x - radius) && (head.x + radius < scoreBall.x + radius)));
   var horizontalCollision = ((head.y - radius > scoreBall.y - radius) && (head.y - radius < scoreBall.y + radius));
+  return verticalCollision && horizontalCollision;
+}
+Snake.prototype.hasCollidedWithBlock = function(block){
+  var head = this.body[0];
+  var radius = this.assets.snakeBallRadius;
+  var verticalCollision = (((head.x + radius > block.x) && (head.x + radius < block.x + block.width)) || 
+  ((head.x - radius < block.x + block.width) && (head.x - radius > block.x)));
+  var horizontalCollision = (head.y - radius > block.y) && (head.y - radius < block.y + block.height);
   return verticalCollision && horizontalCollision;
 }
 Snake.prototype.looseBall = function(){}
