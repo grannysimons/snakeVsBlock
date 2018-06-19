@@ -76,7 +76,11 @@ Game.prototype.checkCollision = function(){
       this.scoreBalls.splice(index,1);
       for(var i=0; i<scoreBall.points; i++)
       {
-        this.snake.addBall();
+        this.snake.addBall.bind(this)
+        setTimeout(function(){
+          this.snake.addBall();
+        }.bind(this), 100 * i);
+        this.draw();
       }
     }
   }.bind(this));  
@@ -84,20 +88,31 @@ Game.prototype.checkCollision = function(){
   this.blocks.forEach(function(block, index){
     if(this.snake.hasCollidedWithBlock(block))
     {
-      console.log("collision with block");
       if(block.points < this.snake.score)
       {
         this.snake.score -= block.points;
         this.blocks.splice(index, 1);
+        console.log('block.points: ' + block.points);
         for(var i=0; i<block.points; i++)
         {
-          this.snake.deleteBall();
+          setTimeout(function(){
+            var pointsIndex = i;
+            this.snake.deleteBall();
+            if(pointsIndex >= 0) this.pauseInterval();
+            if(pointsIndex === block.points) this.resumeInterval();
+            this.draw();
+            console.log('pointsIndex: ' + pointsIndex);
+          }.bind(this), 100 * i, i);
         }
       }
       else
       {
-        this.pauseInterval();
         console.log('You lost!');
+        setTimeout(function(){
+          this.snake.deleteBall();
+          if(this.snake.body.length === 0) this.pauseInterval();
+        }.bind(this), 100 * i);
+        this.draw();
       }
     }
   }.bind(this));
@@ -120,6 +135,7 @@ Game.prototype.draw = function(){
     block.draw();
   });
   this.printScore();
+  this.snake.printScore(); 
 }
 Game.prototype.generateBall = function(){}
 Game.prototype.generateBlocks = function(){
@@ -146,11 +162,11 @@ Game.prototype.destroyBlock = function(blockObj){}
 Game.prototype.generateWall = function(){}
 Game.prototype.finish = function(){}
 Game.prototype.setTest = function(){
-  var BALLS_TEST = 1;
-  for(var i=0; i<BALLS_TEST; i++)
-  {
-    this.snake.addBall();
-  }
+  // var BALLS_TEST = 1;
+  // for(var i=0; i<BALLS_TEST; i++)
+  // {
+  //   this.snake.addBall();
+  // }
 }
 Game.prototype.pauseInterval = function(){
   this.snake.isIntervalPaused = true;

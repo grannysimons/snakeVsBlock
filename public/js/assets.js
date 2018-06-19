@@ -1,4 +1,5 @@
 function Assets(){
+  // snake
   this.snakeCalculationPeriod = 100;
   this.snakeDistanceToLow = 200;
   this.snakeBallRadius = 7;
@@ -7,28 +8,34 @@ function Assets(){
   this.snakeVerticalIncrementTurnInitial_FP = 2 * this.snakeBallRadius - 5;
   this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurnInitial_FP;
   this.snakeColorNormal = "yellow";
-  this.scoreBallColorNormal = "yellow";
   this.scoreColor = "lightgray";
   this.snakeMovementInterval = 60;
   this.snakeIncrementBalls = 10;
   this.snakeIncrementNextBall = 0.2;
-  this.intervalTicks = 0;
-  this.firstIntervalTicks = 1;
+  // scoreball
+  this.scoreBallColorNormal = "yellow";
+  this.ballScores = [1,2,3,4,5];
+  this.maxScoreBalls = 2;
+  this.addingScoreBallsPeriod = 2000;
+  
+  // keyboard
   this.ARROW_RIGHT = 0;
   this.ARROW_LEFT = 1;
   this.SPACEBAR = 2;
   this.A = 3;
-  this.ballScores = [1,2,3,4,5];
-  this.maxScoreBalls = 2;
-  this.addingScoreBallsPeriod = 2000;
-  this.drawInterval = 5;
-
+  
+  // block
   this.blockWidth = 80;
   this.blockHeight = 60;
   this.maxBlocks = 1;
   this.addingBlocksPeriod = 2000;
   this.maxBlockScores = 30;
   this.blockColors = ['#9cbca5', '#e3bf81', '#fc7335', '#b12737', '#4f424b'];
+
+  // game
+  this.intervalTicks = 0;
+  this.firstIntervalTicks = 1;
+  this.drawInterval = 5;
 }
 
 Assets.prototype.calculateVerticalIncrement = function(){
