@@ -1,4 +1,4 @@
-var TEST = false;
+var TEST = true;
 
 window.onload = function(){
   var game = new Game();

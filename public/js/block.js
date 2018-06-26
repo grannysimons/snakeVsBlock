@@ -9,6 +9,7 @@ function Block(assets, ctx)
   this.borderRadius = 10;
   this.points = Math.floor(Math.random() * this.assets.maxBlockScores) + 1;
   this.color = this.assets.blockColors[Math.floor(Math.random() * this.assets.blockColors.length)];
+  this.star = (Math.random() > 0.4) ? true : false;
 }
 
 Block.prototype.draw = function(){
@@ -24,7 +25,9 @@ Block.prototype.draw = function(){
 
   this.ctx.font="20px Arial";
   this.ctx.fillStyle=this.assets.blockScoreColor;
-  this.ctx.fillText(this.points,this.x + this.width/2 - 11, this.y + this.height/2 + 6);
+  var text = ''+this.points;
+  if (this.hasStar()) text += '*';
+  this.ctx.fillText(text,this.x + this.width/2 - 11, this.y + this.height/2 + 6);
 }
 Block.prototype.recalculatePosition = function(){
   this.y += this.assets.drawInterval;
@@ -36,4 +39,7 @@ Block.prototype.setPosition = function(x, y){
 Block.prototype.isOutOfScreen = function(){
   if(this.y > this.ctx.height) return true;
   else return false;
+}
+Block.prototype.hasStar = function(){
+  return this.star;
 }

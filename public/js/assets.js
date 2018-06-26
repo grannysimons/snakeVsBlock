@@ -8,10 +8,12 @@ function Assets(){
   this.snakeVerticalIncrementTurnInitial_FP = 2 * this.snakeBallRadius - 5;
   this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurnInitial_FP;
   this.snakeColorNormal = "yellow";
+  this.snakeColor = this.snakeColorNormal;
   this.scoreColor = "lightgray";
   this.snakeIncrementBalls = 10;
   this.snakeIncrementNextBall = 0.2;
   this.toleranceToCollision = 2;
+  this.starColors = ['#24ffad', '#71ff5d', '#f5fe5f', '#ff5138', '#27fef1', '#ff9445'];
 
   // scoreball
   this.scoreBallColorNormal = "yellow";
@@ -34,10 +36,11 @@ function Assets(){
   this.maxBlockScores = 30;
   this.blockColors = ['#24ffad', '#71ff5d', '#f5fe5f', '#ff5138', '#27fef1', '#ff9445'];
   this.blockScoreColor = 'black';
+  this.starTime = 5000;
 
   //blockPattern
-  this.distanceMax = 600;
-  this.distanceMin = 300;
+  this.distanceMax = 400;
+  this.distanceMin = 200;
   this.maxPatterns = 1; //max number of patterns to be generated at the same time
 
   // game
@@ -46,6 +49,9 @@ function Assets(){
   this.drawInterval = 5;
   this.pauseInterval = 100;
   this.gameInterval = 50;
+  this.starInterval = 10;
+  this.normalInterval = 50;
+  this.starColorInterval = 40;
 }
 
 Assets.prototype.calculateVerticalIncrement = function(){

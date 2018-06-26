@@ -8,6 +8,7 @@ function Game(){
   this.gameOver = false;
   this.pauseTicks = this.assets.pauseInterval + 1;
   this.justStarted = true;
+  this.underStarFX = false;
 
   //context
   this.ctx = document.getElementById('canvas').getContext('2d');
@@ -29,6 +30,8 @@ function Game(){
   this.idInterval = undefined;
   this.gameInterval = undefined;
   this.waitingInterval = undefined;
+  this.starTimeout = undefined;
+  this.starInterval = undefined;
 
   //scoreBalls
   this.scoreBalls = [];
@@ -151,16 +154,51 @@ Game.prototype.checkCollision = function(){
       blockPattern.pattern.forEach(function(block, indexBlock){
         if(this.snake.hasCollidedWithBlock(block))
         {
-          if(block.points < this.snake.score)
+          if(this.underStarFX)
           {
-            for(var i=0; i<block.points; i++)
+            this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
+          }
+          else if(block.points < this.snake.score)
+          {
+            if(block.hasStar() === true)
             {
-              setTimeout(function(){
-                this.snake.score --;
+              this.snake.score -= block.points;
+              for(var i=0; i<block.points; i++)
+              {
                 this.snake.deleteBall();
-                this.draw();
-              }.bind(this), 100 * i);
+              }
+              this.assets.gameInterval = this.assets.starInterval;
+              clearInterval(this.gameInterval);
+              this.gameInterval = setInterval(this._update.bind(this), this.assets.gameInterval);
+              this.underStarFX = true;
+              if(this.starTimeout === undefined) this.starTimeout = setTimeout(function(){
+                this.assets.gameInterval = this.assets.normalInterval;
+                clearInterval(this.gameInterval);
+                this.gameInterval = setInterval(this._update.bind(this), this.assets.gameInterval);
+                this.starTimeout = undefined;
+                clearInterval(this.starInterval);
+                this.starInterval = undefined;
+                this.underStarFX = false;
+                this.snake.color = this.assets.snakeColorNormal;
+                console.log('starTimeout!');
+              }.bind(this), this.assets.starTime);
+              if(this.starInterval === undefined) this.starInterval = setInterval(function(){
+                console.log("canvi de color!");
+                this.snake.color = this.assets.starColors[Math.floor(Math.random() * this.assets.starColors.length)];
+              }.bind(this), this.assets.starColorInterval);
             }
+            if(!this.underStarFX)
+            {
+              for(var i=0; i<block.points; i++)
+              {
+                setTimeout(function(){
+                  this.snake.score --;
+                  this.snake.deleteBall();
+                  this.draw();
+                }.bind(this), 100 * i);
+              }
+            }
+
             this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
           }
           else

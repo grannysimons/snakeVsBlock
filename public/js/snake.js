@@ -6,6 +6,7 @@ function Snake(ctx, assets){
     y: this.ctx.height - this.assets.snakeDistanceToLow,
   }];
   this.score = 1;
+  this.color = this.assets.snakeColor;
 }
 Snake.prototype.hasCollidedWithScoreBall = function(scoreBall){
   if(this.body.length === 0) return false;
@@ -174,7 +175,7 @@ Snake.prototype.draw = function(){
 Snake.prototype.drawBall = function(ball){
   this.ctx.beginPath();
   this.ctx.arc(ball.x, ball.y, this.assets.snakeBallRadius, 0, 2 * Math.PI, false);
-  this.ctx.fillStyle = this.assets.snakeColorNormal;
+  this.ctx.fillStyle = this.color;
   this.ctx.fill();
   this.ctx.closePath();
 }
