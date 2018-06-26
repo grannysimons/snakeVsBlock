@@ -1,7 +1,8 @@
+var TEST = false;
+
 window.onload = function(){
   var game = new Game();
   game.init();
 
-  //test
-  game.setTest();
+  if(TEST) game.setTest();
 }

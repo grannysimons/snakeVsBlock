@@ -23,14 +23,17 @@ Block.prototype.draw = function(){
   this.ctx.stroke();   
 
   this.ctx.font="20px Arial";
-  this.ctx.fillStyle=this.assets.scoreColor;
+  this.ctx.fillStyle=this.assets.blockScoreColor;
   this.ctx.fillText(this.points,this.x + this.width/2 - 11, this.y + this.height/2 + 6);
 }
-
-Block.prototype.setFirstBlock = function(){
-
-}
-
 Block.prototype.recalculatePosition = function(){
   this.y += this.assets.drawInterval;
+}
+Block.prototype.setPosition = function(x, y){
+  this.x = x;
+  this.y = y;
+}
+Block.prototype.isOutOfScreen = function(){
+  if(this.y > this.ctx.height) return true;
+  else return false;
 }

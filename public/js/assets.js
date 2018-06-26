@@ -9,9 +9,10 @@ function Assets(){
   this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurnInitial_FP;
   this.snakeColorNormal = "yellow";
   this.scoreColor = "lightgray";
-  this.snakeMovementInterval = 60;
   this.snakeIncrementBalls = 10;
   this.snakeIncrementNextBall = 0.2;
+  this.toleranceToCollision = 2;
+
   // scoreball
   this.scoreBallColorNormal = "yellow";
   this.ballScores = [1,2,3,4,5];
@@ -23,6 +24,7 @@ function Assets(){
   this.ARROW_LEFT = 1;
   this.SPACEBAR = 2;
   this.A = 3;
+  this.ENTER = 4;
   
   // block
   this.blockWidth = 80;
@@ -30,23 +32,26 @@ function Assets(){
   this.maxBlocks = 1;
   this.addingBlocksPeriod = 2000;
   this.maxBlockScores = 30;
-  this.blockColors = ['#9cbca5', '#e3bf81', '#fc7335', '#b12737', '#4f424b'];
+  this.blockColors = ['#24ffad', '#71ff5d', '#f5fe5f', '#ff5138', '#27fef1', '#ff9445'];
+  this.blockScoreColor = 'black';
+
+  //blockPattern
+  this.distanceMax = 600;
+  this.distanceMin = 300;
+  this.maxPatterns = 1; //max number of patterns to be generated at the same time
 
   // game
   this.intervalTicks = 0;
   this.firstIntervalTicks = 1;
   this.drawInterval = 5;
+  this.pauseInterval = 100;
+  this.gameInterval = 50;
 }
 
 Assets.prototype.calculateVerticalIncrement = function(){
   (this.snakeVerticalIncrementTurn = this.snakeVerticalIncrementTurn - 0.1 * this.intervalTicks);
   if(this.snakeVerticalIncrementTurn < 0.5) this.snakeVerticalIncrementTurn = 0.5; 
 }
-
-Assets.prototype.resetVerticalIncrement = function(){
-  this.snakeVerticalIncrementTurn = this.snakeVerticalIncrementTurnInitial;
-}
-
 Assets.prototype.calculateXincrement = function(x1, dir){
   this.calculateVerticalIncrement();
   var result1 = 0.5 * (2 * x1 + Math.sqrt( Math.pow(2*x1,2) - 4 * (Math.pow(this.snakeVerticalIncrementTurn,2) + Math.pow(x1,2) - 4 * Math.pow(this.snakeBallRadius,2))));
@@ -58,16 +63,10 @@ Assets.prototype.calculateXincrement = function(x1, dir){
   else if(dir === "left") return Math.floor(result1 < x1 ? result1 : result2);
   return "error";
 }
-
 Assets.prototype.calculateVerticalIncrement_FP = function(){
   (this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurn_FP - 0.1 * this.intervalTicks);
   if(this.snakeVerticalIncrementTurn_FP < 0.5) this.snakeVerticalIncrementTurn_FP = 0.5; 
 }
-
-Assets.prototype.resetVerticalIncrement_FP = function(){
-  this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurnInitial_FP;
-}
-
 Assets.prototype.calculateXincrement_FP = function(x1, dir){
   this.calculateVerticalIncrement_FP();
   var result1 = 0.5 * (2 * x1 + Math.sqrt( Math.pow(2*x1,2) - 4 * (Math.pow(this.snakeVerticalIncrementTurn_FP,2) + Math.pow(x1,2) - 4 * Math.pow(this.snakeBallRadius,2))));

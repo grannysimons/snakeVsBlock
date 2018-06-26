@@ -2,3 +2,37 @@
 {
   background-color: black;
 }
+.game{
+  position: relative;
+  color: transparent;
+}
+.pause, .gameover, .start
+{
+  font-family: 'Raleway', sans-serif;
+  width: 800px;
+  height: 600px;
+  background-color: rgba(255,255,255,0.8);
+  color: #222222;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  font-size: 40px;
+  font-weight: 600;
+  animation: pause 3s infinite;
+
+}
+.pause h1, .gameover h1{
+  margin-top: 25%;
+}
+.pause h1, .gameover h1{
+  margin-top: 5%;
+  font-size: 30px;
+}
+
+@keyframes pause {
+  0% {color: rgba(0,0,0,0.3);}
+  40% {color: rgba(0,0,0,0.9);}
+  50% {color: rgba(0,0,0,0.9);}
+  100% {color: rgba(0,0,0,0.3);}
+}
