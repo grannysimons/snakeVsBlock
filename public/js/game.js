@@ -59,7 +59,7 @@ Game.prototype.setTest = function(){
 }
 
 //Generate and manage game elements
-Game.prototype.generateScoreBalls = function(){
+Game.prototype._generateScoreBalls = function(){
   //fills the array this.scoreBalls
   for(var i=0; i<this.assets.maxScoreBalls; i++)
   {
@@ -100,7 +100,7 @@ Game.prototype._addScoreBallToGame = function(ball){
   }
 
 }
-Game.prototype.generateBlocks = function(){
+Game.prototype._generateBlocks = function(){
   //generate and add blocks
   for(var i=0; i<this.assets.maxBlocks; i++)
   {
@@ -116,7 +116,7 @@ Game.prototype.generateBlocks = function(){
     }
   }.bind(this),this.assets.addingBlocksPeriod);
 }
-Game.prototype.generateBlockPatterns = function(){
+Game.prototype._generateBlockPatterns = function(){
   // generate maxPatterns block patterns
   for(var i=0; i<this.assets.maxPatterns; i++)
   {
@@ -127,7 +127,7 @@ Game.prototype.generateBlockPatterns = function(){
     // console.log(this.lastY - this.ctx.height);
   }
 }
-Game.prototype.checkCollision = function(){
+Game.prototype._checkCollision = function(){
   //collision with balls + add balls
   //collision with blocks + delete balls
 
@@ -143,7 +143,7 @@ Game.prototype.checkCollision = function(){
         setTimeout(function(){
           this.snake.addBall();
         }.bind(this), 100 * i);
-        this.draw();
+        this._draw();
       }
     }
   }.bind(this));  
@@ -180,10 +180,8 @@ Game.prototype.checkCollision = function(){
                 this.starInterval = undefined;
                 this.underStarFX = false;
                 this.snake.color = this.assets.snakeColorNormal;
-                console.log('starTimeout!');
               }.bind(this), this.assets.starTime);
               if(this.starInterval === undefined) this.starInterval = setInterval(function(){
-                console.log("canvi de color!");
                 this.snake.color = this.assets.starColors[Math.floor(Math.random() * this.assets.starColors.length)];
               }.bind(this), this.assets.starColorInterval);
             }
@@ -194,7 +192,7 @@ Game.prototype.checkCollision = function(){
                 setTimeout(function(){
                   this.snake.score --;
                   this.snake.deleteBall();
-                  this.draw();
+                  this._draw();
                 }.bind(this), 100 * i);
               }
             }
@@ -203,7 +201,7 @@ Game.prototype.checkCollision = function(){
           }
           else
           {
-            this.setGameOver();
+            this._setGameOver();
             this._pauseInterval();
             for(var i=0; i<block.points; i++)
             {
@@ -214,7 +212,7 @@ Game.prototype.checkCollision = function(){
                   this.snake.score = 0;
                 }
                 this.snake.deleteBall();
-                this.draw();
+                this._draw();
               }.bind(this), 100 * i);
             }
           }
@@ -237,30 +235,30 @@ Game.prototype.checkCollision = function(){
               var pointsIndex = i;
               this.snake.deleteBall();
               if(pointsIndex >= 0) this._pauseInterval();
-              if(pointsIndex === block.points) this.resumeInterval();
-              this.draw();
+              if(pointsIndex === block.points) this._resumeInterval();
+              this._draw();
             }.bind(this), 100 * i, i);
           }
         }
         else
         {
-          this.setGameOver();
+          this._setGameOver();
           setTimeout(function(){
             this.snake.deleteBall();
             // if(this.snake.body.length === 0) this._pauseInterval();
           }.bind(this), 100 * i);
-          this.draw();
+          this._draw();
         }
       }
     }.bind(this));
   }
 }
-Game.prototype.manageBlocks = function(){
+Game.prototype._manageBlocks = function(){
   if(this.patterns)
     {
       if(this.blockPatterns.length === 0 || (this.blockPatterns.length > 0 && this.blockPatterns[this.blockPatterns.length -1].y > 0))
       {
-        this.generateBlockPatterns();
+        this._generateBlockPatterns();
       } 
       for (var i=0; i<this.blockPatterns.length; i++)
       {
@@ -273,9 +271,9 @@ Game.prototype.manageBlocks = function(){
     {
       this.blocks.recalculatePosition();
     }
-    this.deleteBlocksOutOfCanvas();
+    this._deleteBlocksOutOfCanvas();
 }
-Game.prototype.deleteBlocksOutOfCanvas = function(){
+Game.prototype._deleteBlocksOutOfCanvas = function(){
   //deletes blocks out of the canvas
   this.blocks.forEach(function(block, index){
     if (block.y > this.ctx.height) this.blocks.splice(index, 1);
@@ -287,20 +285,20 @@ Game.prototype.deleteBlocksOutOfCanvas = function(){
 }
 
 //Drawing functions
-Game.prototype.printGeneralScore = function(){
+Game.prototype._printGeneralScore = function(){
   //prints general score (right bottom red number)
   //for testint purpose
   this.ctx.font="30px Arial";
   this.ctx.fillStyle="white";
   this.ctx.fillText(this.snake.score,this.ctx.width - 70, this.ctx.height - 50);
 }
-Game.prototype.clearCanvas = function(){
+Game.prototype._clearCanvas = function(){
   //clears everything
   this.ctx.clearRect(0,0,this.ctx.width, this.ctx.height);
 }
-Game.prototype.draw = function(){
+Game.prototype._draw = function(){
   //draw everything
-  this.clearCanvas();
+  this._clearCanvas();
 
   this.scoreBalls.forEach(function(scoreBall){
     // scoreBall.recalculatePosition();
@@ -324,7 +322,7 @@ Game.prototype.draw = function(){
     });
   }
   
-  // this.printGeneralScore();
+  // this._printGeneralScore();
 }
 
 //Game status
@@ -332,9 +330,21 @@ Game.prototype._pauseInterval = function(){
   //pauses the main setInterval (pauses the loop)
   this.intervalPaused = true;
 }
-Game.prototype.resumeInterval = function(){
+Game.prototype._resumeInterval = function(){
   //resumes the main setInterval (resumes the loop)
   this.intervalPaused = false;
+}
+Game.prototype._restartGame = function(){
+  clearInterval(this.gameInterval);
+  this.gameInterval = setInterval(this._update.bind(this), this.assets.gameInterval);
+  this.scoreBalls = [];
+  this.patterns = [];
+  this.blockPatterns = [];
+  this._generateScoreBalls();
+  if(!this.patterns) this._generateBlocks();
+  else this._generateBlockPatterns();
+  this.snake.restart();
+  this._draw();
 }
 Game.prototype._isIntervalPaused = function(){ 
   //checks if the main setInterval is paused
@@ -343,31 +353,51 @@ Game.prototype._isIntervalPaused = function(){
 Game.prototype._isGameOver = function(){
   return (this.gameOver && !this._anyKeyPressed());
 }
-Game.prototype._isVeryBegining = function(){
-  return (!this._anyKeyPressed() && this.justStarted === true);
+Game.prototype._startScreen = function(){
+  this._hideAllScreens();
+  document.getElementsByClassName('start')[0].style.display = 'block';
 }
-Game.prototype._isBeginingAfterGameOver = function(){
-  return (this._anyKeyPressed() && this.keys[this.assets.ENTER] === true && this.justStarted === false);
+Game.prototype._pauseScreen = function(){
+  this._hideAllScreens();
+  document.getElementsByClassName('pause')[0].style.display = 'block';
 }
-Game.prototype._startTheGame = function(){
-  return (this._anyKeyPressed() && this.keys[this.assets.ENTER] === true && this.justStarted === true);
+Game.prototype._gameOverScreen = function(){
+  this._hideAllScreens();
+  document.getElementsByClassName('gameover')[0].style.display = 'block';  
 }
-Game.prototype._pausedGame = function(){
-  return (this._anyKeyPressed() && this.keys[this.assets.SPACEBAR] === true && this.justStarted === false);
+Game.prototype._hideAllScreens = function(){
+  document.getElementsByClassName('pause')[0].style.display = 'none';
+  document.getElementsByClassName('start')[0].style.display = 'none';
+  document.getElementsByClassName('gameover')[0].style.display = 'none';
 }
-Game.prototype._isNormalMode = function(){
-  return (!this._isIntervalPaused() && !this._isGameOver());
+Game.prototype._softPauseKey = function(){
+  this.pauseTicks = 0;
+  if(this.waitingInterval != undefined)
+  {
+    clearInterval(this.waitingInterval);
+    this.waitingInterval = undefined;
+  }
+  this.waitingInterval = setInterval(function(){
+    this.pauseTicks ++;
+  }.bind(this), this.assets.gameInterval);
+}
+Game.prototype._setGameOver = function(){
+  // clearInterval(this.gameInterval);
+  this.gameOver = true;
+  //show gameOver image
+  this._gameOverScreen();
+  this.status = 'gameover';
 }
 
 //Position
-Game.prototype.adaptVerticalIncrement = function(key){
+Game.prototype._adaptVerticalIncrement = function(key){
   //if there has been a change of direction, it resets snake vertical increment
   if(this.lastKeyPressed != key)
   {
     this.snake.resetVerticalIncrement();
   }
 }
-Game.prototype.adaptVerticalIncrementFirstPositions = function(key){
+Game.prototype._adaptVerticalIncrementFirstPositions = function(key){
   //if there has been a change of direction, it resets snake vertical increment in the first positions
   if(this.lastKeyPressed != key)
   {
@@ -384,25 +414,13 @@ Game.prototype._anyKeyPressed = function(){
   });
   return anyKeyPressed;
 }
-Game.prototype.setKeyPressed = function(key)
+Game.prototype._setKeyPressed = function(key)
 {
   //sets last key pressed
   this.lastKeyPressed = key;
 }
 
 //General functions
-Game.prototype._restartGame = function(){
-  clearInterval(this.gameInterval);
-  this.gameInterval = setInterval(this._update.bind(this), this.assets.gameInterval);
-  this.scoreBalls = [];
-  this.patterns = [];
-  this.blockPatterns = [];
-  this.generateScoreBalls();
-  if(!this.patterns) this.generateBlocks();
-  else this.generateBlockPatterns();
-  this.snake.restart();
-  this.draw();
-}
 Game.prototype.init = function(){
   //sets game loop
   //manages events
@@ -460,38 +478,10 @@ Game.prototype.init = function(){
     }
   }.bind(this));
 
-  this.generateScoreBalls();
-  if(!this.patterns) this.generateBlocks();
-  else this.generateBlockPatterns();
-  this.draw();
-}
-Game.prototype.startScreen = function(){
-  this.hideAllScreens();
-  document.getElementsByClassName('start')[0].style.display = 'block';
-}
-Game.prototype.pauseScreen = function(){
-  this.hideAllScreens();
-  document.getElementsByClassName('pause')[0].style.display = 'block';
-}
-Game.prototype.gameOverScreen = function(){
-  this.hideAllScreens();
-  document.getElementsByClassName('gameover')[0].style.display = 'block';  
-}
-Game.prototype.hideAllScreens = function(){
-  document.getElementsByClassName('pause')[0].style.display = 'none';
-  document.getElementsByClassName('start')[0].style.display = 'none';
-  document.getElementsByClassName('gameover')[0].style.display = 'none';
-}
-Game.prototype._softPauseKey = function(){
-  this.pauseTicks = 0;
-  if(this.waitingInterval != undefined)
-  {
-    clearInterval(this.waitingInterval);
-    this.waitingInterval = undefined;
-  }
-  this.waitingInterval = setInterval(function(){
-    this.pauseTicks ++;
-  }.bind(this), this.assets.gameInterval);
+  this._generateScoreBalls();
+  if(!this.patterns) this._generateBlocks();
+  else this._generateBlockPatterns();
+  this._draw();
 }
 Game.prototype._update = function()
 {
@@ -499,14 +489,14 @@ Game.prototype._update = function()
   if(this.status === 'start')
   {
     console.log('status START'); 
-    this.startScreen();
+    this._startScreen();
     return;
   }
   else if(this.status === 'normal')
   {
     // console.log('status NORMAL');
     console.log(this.snake.body.length);
-    this.hideAllScreens();
+    this._hideAllScreens();
     if(this._anyKeyPressed() === false)
     {
       if (this.assets.intervalTicks < this.assets.firstIntervalTicks)
@@ -529,81 +519,75 @@ Game.prototype._update = function()
             case this.assets.ARROW_RIGHT:
               if (this.assets.intervalTicks < this.assets.firstIntervalTicks)
               {
-                this.adaptVerticalIncrementFirstPositions('right');
+                this._adaptVerticalIncrementFirstPositions('right');
                 // this.snake.moveRightFirstPositions();
                 this.snake.moveRight();
               }
               else
               {
-                this.adaptVerticalIncrement('right');
+                this._adaptVerticalIncrement('right');
                 this.snake.moveRight();
               }
-              this.setKeyPressed('right');
+              this._setKeyPressed('right');
               this.assets.intervalTicks++;
             break;
             case this.assets.ARROW_LEFT:
               if (this.assets.intervalTicks < this.assets.firstIntervalTicks)
               {
-                this.adaptVerticalIncrementFirstPositions('left');
+                this._adaptVerticalIncrementFirstPositions('left');
                 // this.snake.moveLeftFirstPositions();
                 this.snake.moveLeft();
               }
               else 
               {
-                this.adaptVerticalIncrement('left');
+                this._adaptVerticalIncrement('left');
                 this.snake.moveLeft();
               }
-              this.setKeyPressed('left');
+              this._setKeyPressed('left');
               this.assets.intervalTicks++;
             break;
           }
         }
       }.bind(this));
     }
-    this.checkCollision();
+    this._checkCollision();
     this.scoreBalls.forEach(function(scoreBall){
       scoreBall.recalculatePosition();
     }.bind(this));
-    this.manageBlocks();
-    this.draw();
+    this._manageBlocks();
+    this._draw();
   }
   else if(this.status === 'gameover')
   {
-    this.gameOverScreen();
+    this._gameOverScreen();
     console.log('status GAMEOVER');
     //this.gameOver && !this._anyKeyPressed()
     //if user already lost
-    this.setKeyPressed(undefined);
+    this._setKeyPressed(undefined);
     this.justStarted = false;
     return;
   }
   else if(this.status === 'pause')
   {
-    this.pauseScreen();
+    this._pauseScreen();
     console.log('status PAUSE');
     //this._anyKeyPressed() && this.keys[this.assets.SPACEBAR] === true && this.justStarted === false
     //spacebar is pressed to pause the game
-    this.adaptVerticalIncrement('space');
+    this._adaptVerticalIncrement('space');
     if(this._isIntervalPaused() && this.pauseTicks > this.assets.pauseInterval){
-      this.resumeInterval();
-      this.hideAllScreens();
+      this._resumeInterval();
+      this._hideAllScreens();
       this._softPauseKey();
     }
     else if(this.pauseTicks > this.assets.pauseInterval)
     {
       this._pauseInterval();
-      this.pauseScreen();
+      this._pauseScreen();
       this._softPauseKey();
     }
   }
   return;
 }
-Game.prototype.setGameOver = function(){
-  // clearInterval(this.gameInterval);
-  this.gameOver = true;
-  //show gameOver image
-  this.gameOverScreen();
-  this.status = 'gameover';
-}
+
 
 // Game.prototype.generateWall = function(){}
