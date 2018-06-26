@@ -45,6 +45,10 @@ function Game(){
   this.blockPatterns = [];
   this.lastY = 0;
   this.patterns = true; //if we work in single blocks (false) or in whole patterns (true)
+
+  //score
+  this.maxScore = 0;
+  this.score = 0;
 }
 //Test
 Game.prototype.setTest = function(){
@@ -145,6 +149,9 @@ Game.prototype._checkCollision = function(){
         }.bind(this), 100 * i);
         this._draw();
       }
+      if(this.snake.score > this.score) this.score = this.snake.score;
+      if(this.score > this.maxScore) this.maxScore = this.score;
+      this._printScore();
     }
   }.bind(this));  
 
@@ -285,12 +292,11 @@ Game.prototype._deleteBlocksOutOfCanvas = function(){
 }
 
 //Drawing functions
-Game.prototype._printGeneralScore = function(){
-  //prints general score (right bottom red number)
-  //for testint purpose
-  this.ctx.font="30px Arial";
-  this.ctx.fillStyle="white";
-  this.ctx.fillText(this.snake.score,this.ctx.width - 70, this.ctx.height - 50);
+Game.prototype._printScore = function(){
+  //prints score of this round
+  document.getElementsByClassName('score')[0].innerHTML = this.score;
+  //prints maximum score since web app was launched
+  document.getElementsByClassName('max-score')[0].innerHTML = this.maxScore;
 }
 Game.prototype._clearCanvas = function(){
   //clears everything
@@ -322,7 +328,7 @@ Game.prototype._draw = function(){
     });
   }
   
-  // this._printGeneralScore();
+  this._printScore();
 }
 
 //Game status
@@ -340,6 +346,7 @@ Game.prototype._restartGame = function(){
   this.scoreBalls = [];
   this.patterns = [];
   this.blockPatterns = [];
+  this.score = 0;
   this._generateScoreBalls();
   if(!this.patterns) this._generateBlocks();
   else this._generateBlockPatterns();

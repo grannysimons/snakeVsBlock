@@ -18,7 +18,7 @@ function Assets(){
   // scoreball
   this.scoreBallColorNormal = "yellow";
   this.ballScores = [1,2,3,4,5];
-  this.maxScoreBalls = 2;
+  this.maxScoreBalls = 6;
   this.addingScoreBallsPeriod = 2000;
   
   // keyboard
