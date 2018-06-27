@@ -23,11 +23,22 @@ Block.prototype.draw = function(){
   this.ctx.fill();
   this.ctx.stroke();   
 
-  this.ctx.font="20px Arial";
+  this.ctx.font="20px Montserrat";
   this.ctx.fillStyle=this.assets.blockScoreColor;
-  var text = ''+this.points;
-  if (this.hasStar()) text += '*';
-  this.ctx.fillText(text,this.x + this.width/2 - 11, this.y + this.height/2 + 6);
+  if (this.hasStar())
+  {
+    this.ctx.textAlign="center";
+    if(this.points > 10)  this.ctx.fillText(this.points,this.x + this.width/2, this.y + this.height/2);
+    else this.ctx.fillText(this.points,this.x + this.width/2, this.y + this.height/2);
+    this.ctx.font='15px FontAwesome';
+    this.ctx.textAlign="center";
+    this.ctx.fillText("\uf005",this.x + this.width/2, this.y + this.height/2 + 20);
+  }
+  else
+  {
+    this.ctx.textAlign="center";
+    this.ctx.fillText(this.points,this.x + this.width/2, this.y + this.height/2 + 6);
+  }
 }
 Block.prototype.recalculatePosition = function(){
   this.y += this.assets.drawInterval;

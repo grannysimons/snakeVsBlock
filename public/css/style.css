@@ -1,3 +1,8 @@
+@font-face
+{
+  font-family: 'FontAwesome';
+  src: url('../font-awesome-4.7.0/fonts/fontawesome-webfont.ttf');
+}
 body
 {
   background-color: black;
@@ -111,10 +116,12 @@ body
 .fa-crown
 {
   margin-left: 50px;
+  font-family: 'FontAwesome';
 }
 .fa-crown, .fa-trophy
 {
   margin-right: 10px;
+  font-family: 'FontAwesome';
 }
 
 @keyframes pause {

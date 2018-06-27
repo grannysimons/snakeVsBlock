@@ -495,13 +495,11 @@ Game.prototype._update = function()
   // function to be executed at every iteration of the loop
   if(this.status === 'start')
   {
-    console.log('status START'); 
     this._startScreen();
     return;
   }
   else if(this.status === 'normal')
   {
-    // console.log('status NORMAL');
     console.log(this.snake.body.length);
     this._hideAllScreens();
     if(this._anyKeyPressed() === false)
@@ -567,7 +565,6 @@ Game.prototype._update = function()
   else if(this.status === 'gameover')
   {
     this._gameOverScreen();
-    console.log('status GAMEOVER');
     //this.gameOver && !this._anyKeyPressed()
     //if user already lost
     this._setKeyPressed(undefined);
@@ -577,7 +574,6 @@ Game.prototype._update = function()
   else if(this.status === 'pause')
   {
     this._pauseScreen();
-    console.log('status PAUSE');
     //this._anyKeyPressed() && this.keys[this.assets.SPACEBAR] === true && this.justStarted === false
     //spacebar is pressed to pause the game
     this._adaptVerticalIncrement('space');

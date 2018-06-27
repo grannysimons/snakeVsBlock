@@ -13,7 +13,7 @@ Scoreball.prototype.draw = function(){
   this.ctx.fill();
   this.ctx.closePath();
 
-  this.ctx.font="10px Arial";
+  this.ctx.font="10px Montserrat";
   this.ctx.fillStyle=this.assets.scoreColor;
   this.ctx.fillText(this.points,this.x - 3, this.y - this.assets.snakeBallRadius - 6);
 }
