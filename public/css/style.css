@@ -21,24 +21,7 @@ body
   margin: auto;
   border: solid 1px darkgray;
 }
-.gameover
-{
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 200;
-  width: 800px;
-  height: 600px;
-  background-color: rgba(255,255,255,0.8);
-  color: #222222;
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: none;
-  font-size: 40px;
-  animation: pause 3s infinite;
-  text-align: center;
-  /* margin: auto; */
-}
-.start, .pause
+.start, .pause, .gameover
 {
   background-color: black;
   color: white;
@@ -75,13 +58,17 @@ body
   bottom: 170px;
   left: 395px;
 }
-.start h1, .pause h1{
+.start h1, .pause h1, .gameover h1{
   font-weight: 200;
 }
-.start h2, .pause h2{
+.start h2, .pause h2, .gameover h2{
   margin-top: 100px;
   font-size: 16px;
   font-weight: 200;
+}
+.gameover h1{
+  margin-top: 200px;
+  animation: 2s gameover infinite;
 }
 .pause i
 {
@@ -113,12 +100,12 @@ body
   margin-right: 310px;
 
 }
-.fa-crown
+.fa-trophy
 {
   margin-left: 50px;
   font-family: 'FontAwesome';
 }
-.fa-crown, .fa-trophy
+.fa-star, .fa-trophy
 {
   margin-right: 10px;
   font-family: 'FontAwesome';
@@ -131,6 +118,12 @@ body
   100% {color: rgba(252, 252, 13,0.3);}
 }
 @keyframes start {
+  0% {color: rgba(255,255,255,0.3);}
+  40% {color: rgba(255,255,255,0.6);}
+  50% {color: rgba(255,255,255,0.6);}
+  100% {color: rgba(255,255,255,0.3);}
+}
+@keyframes gameover {
   0% {color: rgba(255,255,255,0.3);}
   40% {color: rgba(255,255,255,0.6);}
   50% {color: rgba(255,255,255,0.6);}

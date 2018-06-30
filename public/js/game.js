@@ -40,6 +40,7 @@ function Game(){
   //blocks
   this.blocks = [];
   this.blocksInterval = undefined;
+  this.crashInterval = undefined;
 
   //blockPatterns
   this.blockPatterns = [];
@@ -49,17 +50,39 @@ function Game(){
   //score
   this.maxScore = 0;
   this.score = 0;
+
+  //sound
+  this.soundStart = ["soundStart"];
+  this.soundStar = ["soundStar1", "soundStar2", "soundStar3", "soundStar4"];
+  this.soundCrash = ["soundCrash"];
+  this.soundGameOver = ["soundGameOver1" , "soundGameOver2" , "soundGameOver3"];
+  this.playingSound = undefined;
 }
 //Test
 Game.prototype.setTest = function(){
   //sets test for develop purposes
   //activate test from main.js
-  var BALLS_TEST = 10;
+  var BALLS_TEST = 70;
   for(var i=0; i<BALLS_TEST; i++)
   {
     this.snake.addBall();
-    this.snake.score = 11;
+    this.snake.score = 71;
   }
+}
+
+//Sound functions
+Game.prototype.loadSound = function () {
+  createjs.Sound.registerSound("../sounds/crash.mp3", this.soundCrash[0]);
+  createjs.Sound.registerSound("../sounds/gameover1.mp3", this.soundGameOver[0]);
+  createjs.Sound.registerSound("../sounds/gameover2.mp3", this.soundGameOver[1]);
+  createjs.Sound.registerSound("../sounds/gameover3.mp3", this.soundGameOver[2]);
+  createjs.Sound.registerSound("../sounds/star1.mp3", this.soundStar[0]);
+  createjs.Sound.registerSound("../sounds/star2.mp3", this.soundStar[1]);
+  createjs.Sound.registerSound("../sounds/star3.mp3", this.soundStar[2]);
+  createjs.Sound.registerSound("../sounds/start.mp3", this.soundStart[0]);
+}
+Game.prototype.playSound = function (soundID) {
+  createjs.Sound.play(soundID);
 }
 
 //Generate and manage game elements
@@ -83,22 +106,19 @@ Game.prototype._generateScoreBalls = function(){
   }.bind(this),this.assets.addingScoreBallsPeriod);
 }
 Game.prototype._addScoreBallToGame = function(ball){
-  var collisionBlockBall = false;
+  var invalidPosition = false;
+  var textVerticalSpace = 20;
   this.blockPatterns.forEach(function(blockPattern){
     blockPattern.pattern.forEach(function(block){
       var horizontalCollision = ((ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision < block.x + block.width) && (ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision > block.x)) ||
       ((ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision < block.x + block.width) && (ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision > block.x));
-      var verticalCollision = ((ball.y - this.assets.snakeBallRadius - this.assets.toleranceToCollision > block.y) && (ball.y - this.assets.snakeBallRadius - this.assets.toleranceToCollision < block.y + block.height)) ||
-      ((ball.y + this.assets.snakeBallRadius + this.assets.toleranceToCollision > block.y) && (ball.y + this.assets.snakeBallRadius + this.assets.toleranceToCollision < block.y + block.height))
+      var verticalCollision = ((ball.y - this.assets.snakeBallRadius - this.assets.toleranceToCollision - textVerticalSpace > block.y) && (ball.y - this.assets.snakeBallRadius - this.assets.toleranceToCollision - textVerticalSpace < block.y + block.height)) ||
+      ((ball.y + this.assets.snakeBallRadius + this.assets.toleranceToCollision > block.y) && (ball.y + this.assets.snakeBallRadius + this.assets.toleranceToCollision < block.y + block.height));
       var edge = (ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision < 0) || (ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision > this.ctx.width);
-      var invalidPosition = (verticalCollision && horizontalCollision) || edge;
-      if(invalidPosition)
-      {
-        collisionBlockBall = true;
-      }
+      invalidPosition = (verticalCollision && horizontalCollision) || edge;
     }.bind(this));
   }.bind(this));
-  if(!collisionBlockBall)
+  if(!invalidPosition)
   {
     this.scoreBalls.push(ball);
   }
@@ -128,7 +148,6 @@ Game.prototype._generateBlockPatterns = function(){
     blockPat.generatePatternAt(this.lastY, this.snake.score);
     this.blockPatterns.push(blockPat);
     this.lastY = blockPat.y;
-    // console.log(this.lastY - this.ctx.height);
   }
 }
 Game.prototype._checkCollision = function(){
@@ -164,6 +183,7 @@ Game.prototype._checkCollision = function(){
           if(this.underStarFX)
           {
             this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
+            this._crashFX(block);
           }
           else if(block.points < this.snake.score)
           {
@@ -205,23 +225,32 @@ Game.prototype._checkCollision = function(){
             }
 
             this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
+            this._crashFX(block);
           }
           else
           {
-            this._setGameOver();
-            this._pauseInterval();
+            // this._pauseInterval();
             for(var i=0; i<block.points; i++)
             {
-              setTimeout(function(){
-                this.snake.score --;
-                if (this.snake.score < 0)
-                {
-                  this.snake.score = 0;
-                }
-                this.snake.deleteBall();
-                this._draw();
-              }.bind(this), 100 * i);
+              this.snake.score --;
+              if (this.snake.score < 0)
+              {
+                this.snake.score = 0;
+              }
+              this.snake.deleteBall();
+              this._draw();
+
+              // setTimeout(function(){
+              //   this.snake.score --;
+              //   if (this.snake.score < 0)
+              //   {
+              //     this.snake.score = 0;
+              //   }
+              //   this.snake.deleteBall();
+              //   this._draw();
+              // }.bind(this), 100 * i);
             }
+            this._setGameOver();
           }
         }
       }.bind(this));
@@ -232,7 +261,13 @@ Game.prototype._checkCollision = function(){
     this.blocks.forEach(function(block, index){
       if(this.snake.hasCollidedWithBlock(block))
       {
-        if(block.points < this.snake.score)
+
+        if(this.underStarFX)
+        {
+          this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
+          this._crashFX(block);
+        }
+        else if(block.points < this.snake.score)
         {
           this.snake.score -= block.points;
           this.blocks.splice(index, 1);
@@ -289,6 +324,78 @@ Game.prototype._deleteBlocksOutOfCanvas = function(){
   this.blockPatterns.forEach(function(blockPattern, index){
     if (blockPattern.y > this.ctx.height) this.blockPatterns.splice(index, 1);
   }.bind(this));
+}
+Game.prototype._crashFX = function(block){
+  var originX = this.snake.body[0].x;
+  var originY = this.snake.body[0].y;
+  var x1 = originX;
+  var x2 = originX;
+  var y1 = originY;
+  var y2 = originY;
+  var radi = this.assets.snakeBallRadius - 1;
+  if(!this.crashInterval) this.crashInterval = setInterval(function(){
+    x1+=5;
+    y1+=5;
+    x2-=5;
+    y2-=5;
+    radi = radi<=0.6 ? 0 : radi-0.6;
+    this._clearCanvas();
+    this._draw();
+
+    this.ctx.beginPath();
+    this.ctx.arc(x1,y1, radi, 0, 2 * Math.PI, false);
+    this.ctx.fillStyle = 'yellow';
+    this.ctx.fill();
+    this.ctx.closePath();
+
+    this.ctx.beginPath();
+    this.ctx.arc(x1,y2, radi, 0, 2 * Math.PI, false);
+    this.ctx.fillStyle = 'yellow';
+    this.ctx.fill();
+    this.ctx.closePath();
+
+    this.ctx.beginPath();
+    this.ctx.arc(x2,y1, radi, 0, 2 * Math.PI, false);
+    this.ctx.fillStyle = 'yellow';
+    this.ctx.fill();
+    this.ctx.closePath();
+
+    this.ctx.beginPath();
+    this.ctx.arc(x2,y2, radi, 0, 2 * Math.PI, false);
+    this.ctx.fillStyle = 'yellow';
+    this.ctx.fill();
+    this.ctx.closePath();
+
+    this.ctx.beginPath();
+    this.ctx.arc(x1,originY+1, radi, 0, 2 * Math.PI, false);
+    this.ctx.fillStyle = 'yellow';
+    this.ctx.fill();
+    this.ctx.closePath();
+
+    this.ctx.beginPath();
+    this.ctx.arc(x2,originY+1, radi, 0, 2 * Math.PI, false);
+    this.ctx.fillStyle = 'yellow';
+    this.ctx.fill();
+    this.ctx.closePath();
+
+    this.ctx.beginPath();
+    this.ctx.arc(originX+1,y1, radi, 0, 2 * Math.PI, false);
+    this.ctx.fillStyle = 'yellow';
+    this.ctx.fill();
+    this.ctx.closePath();
+
+    this.ctx.beginPath();
+    this.ctx.arc(originX+1,y2, radi, 0, 2 * Math.PI, false);
+    this.ctx.fillStyle = 'yellow';
+    this.ctx.fill();
+    this.ctx.closePath();
+  
+    if (radi <= 0.0)
+    {
+      clearInterval(this.crashInterval);
+      this.crashInterval = undefined;
+    }
+  }.bind(this), 40);
 }
 
 //Drawing functions
@@ -347,9 +454,9 @@ Game.prototype._restartGame = function(){
   this.patterns = [];
   this.blockPatterns = [];
   this.score = 0;
-  this._generateScoreBalls();
   if(!this.patterns) this._generateBlocks();
   else this._generateBlockPatterns();
+  this._generateScoreBalls();
   this.snake.restart();
   this._draw();
 }
@@ -434,7 +541,7 @@ Game.prototype.init = function(){
   //generates game elements (scoreBalls, blocks)
   //make an initial draw
 
-  if(this.gameInterval === undefined) this.gameInterval = setInterval(this._update.bind(this), this.assets.gameInterval);
+  if(!this.gameInterval) this.gameInterval = setInterval(this._update.bind(this), this.assets.gameInterval);
 
   window.addEventListener('keydown', function(e){
     switch(e.key)
@@ -450,6 +557,10 @@ Game.prototype.init = function(){
         if(this.status === 'start')
         {
           this.status = 'normal';
+          if (!this.playingSound) this.playingSound = setTimeout(function(){
+            this.playSound(this.soundStart[0]);
+          }, 1000);
+          // this._restartGame();
         }
         else if(this.status === 'gameover')
         {
@@ -485,10 +596,13 @@ Game.prototype.init = function(){
     }
   }.bind(this));
 
-  this._generateScoreBalls();
+  this._generateInitialScenario();
+  this._draw();
+}
+Game.prototype._generateInitialScenario = function(){
   if(!this.patterns) this._generateBlocks();
   else this._generateBlockPatterns();
-  this._draw();
+  this._generateScoreBalls();
 }
 Game.prototype._update = function()
 {
@@ -500,7 +614,7 @@ Game.prototype._update = function()
   }
   else if(this.status === 'normal')
   {
-    console.log(this.snake.body.length);
+    // console.log(this.snake.body.length);
     this._hideAllScreens();
     if(this._anyKeyPressed() === false)
     {
@@ -565,7 +679,6 @@ Game.prototype._update = function()
   else if(this.status === 'gameover')
   {
     this._gameOverScreen();
-    //this.gameOver && !this._anyKeyPressed()
     //if user already lost
     this._setKeyPressed(undefined);
     this.justStarted = false;
@@ -592,5 +705,11 @@ Game.prototype._update = function()
   return;
 }
 
+Game.prototype.gameOverReload = function(){
+  if(this.status === 'gameover')
+  {
+    window.location.reload(true);
+  }
+}
 
 // Game.prototype.generateWall = function(){}

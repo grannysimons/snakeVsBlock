@@ -49,7 +49,7 @@ function Assets(){
   this.drawInterval = 5;
   this.pauseInterval = 100;
   this.gameInterval = 50;
-  this.starInterval = 10;
+  this.starInterval = 20;
   this.normalInterval = 50;
   this.starColorInterval = 40;
 }
