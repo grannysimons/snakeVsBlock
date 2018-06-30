@@ -52,11 +52,11 @@ function Game(){
   this.score = 0;
 
   //sound
-  this.soundStart = ["soundStart"];
-  this.soundStar = ["soundStar1", "soundStar2", "soundStar3", "soundStar4"];
-  this.soundCrash = ["soundCrash"];
-  this.soundGameOver = ["soundGameOver1" , "soundGameOver2" , "soundGameOver3"];
-  this.playingSound = undefined;
+  this.audioStart = document.getElementById('audio-start');
+  this.audioCrash = document.getElementById('audio-crash');
+  this.audioGameover = [document.getElementById('audio-gameover-1'), document.getElementById('audio-gameover-2'), document.getElementById('audio-gameover-3')];
+  this.audioStar = [document.getElementById('audio-star-1'), document.getElementById('audio-star-2'), document.getElementById('audio-star-3')];
+  this.audioScoreBall = document.getElementById('audio-scoreBall');
 }
 //Test
 Game.prototype.setTest = function(){
@@ -68,21 +68,6 @@ Game.prototype.setTest = function(){
     this.snake.addBall();
     this.snake.score = 71;
   }
-}
-
-//Sound functions
-Game.prototype.loadSound = function () {
-  createjs.Sound.registerSound("../sounds/crash.mp3", this.soundCrash[0]);
-  createjs.Sound.registerSound("../sounds/gameover1.mp3", this.soundGameOver[0]);
-  createjs.Sound.registerSound("../sounds/gameover2.mp3", this.soundGameOver[1]);
-  createjs.Sound.registerSound("../sounds/gameover3.mp3", this.soundGameOver[2]);
-  createjs.Sound.registerSound("../sounds/star1.mp3", this.soundStar[0]);
-  createjs.Sound.registerSound("../sounds/star2.mp3", this.soundStar[1]);
-  createjs.Sound.registerSound("../sounds/star3.mp3", this.soundStar[2]);
-  createjs.Sound.registerSound("../sounds/start.mp3", this.soundStart[0]);
-}
-Game.prototype.playSound = function (soundID) {
-  createjs.Sound.play(soundID);
 }
 
 //Generate and manage game elements
@@ -162,8 +147,13 @@ Game.prototype._checkCollision = function(){
       for(var i=0; i<scoreBall.points; i++)
       {
         this.snake.score ++;
-        this.snake.addBall.bind(this)
+        // this.snake.addBall.bind(this);
+        // this.audioScoreBall.pause();
+        // this.audioScoreBall.play();
+        
         setTimeout(function(){
+          console.log("entro");
+          this.audioScoreBall.play();
           this.snake.addBall();
         }.bind(this), 100 * i);
         this._draw();
@@ -183,7 +173,12 @@ Game.prototype._checkCollision = function(){
           if(this.underStarFX)
           {
             this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
-            this._crashFX(block);
+            this._crashFX();
+            setTimeout(function(){
+              this.stopAudios(true,false,false,true,true);
+              var randIndex = Math.floor(Math.random() * this.audioStar.length);
+              this.audioStar[randIndex].play();
+            }.bind(this), 2000);
           }
           else if(block.points < this.snake.score)
           {
@@ -225,7 +220,7 @@ Game.prototype._checkCollision = function(){
             }
 
             this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
-            this._crashFX(block);
+            this._crashFX();
           }
           else
           {
@@ -251,6 +246,9 @@ Game.prototype._checkCollision = function(){
               // }.bind(this), 100 * i);
             }
             this._setGameOver();
+            this.stopAudios(true, true, true, true, true);
+            var randIndex = Math.floor(Math.random() * this.audioGameover.length);
+            this.audioGameover[randIndex].play();
           }
         }
       }.bind(this));
@@ -265,7 +263,7 @@ Game.prototype._checkCollision = function(){
         if(this.underStarFX)
         {
           this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
-          this._crashFX(block);
+          this._crashFX();
         }
         else if(block.points < this.snake.score)
         {
@@ -325,7 +323,10 @@ Game.prototype._deleteBlocksOutOfCanvas = function(){
     if (blockPattern.y > this.ctx.height) this.blockPatterns.splice(index, 1);
   }.bind(this));
 }
-Game.prototype._crashFX = function(block){
+Game.prototype._crashFX = function(){
+  this.stopAudios(false, true, false, true, true);
+  this.audioCrash.play();
+
   var originX = this.snake.body[0].x;
   var originY = this.snake.body[0].y;
   var x1 = originX;
@@ -398,6 +399,36 @@ Game.prototype._crashFX = function(block){
   }.bind(this), 40);
 }
 
+//audio functions
+Game.prototype.stopAudios = function(start, crash, score, gameover, star){
+  if(start)
+  {
+    this.audioStart.pause();
+    this.audioStart.currentTime = 0;      
+  }
+  if(crash)
+  {
+    this.audioCrash.pause();
+    this.audioCrash.currentTime = 0;
+  }
+
+  if(score)
+  {
+    this.audioScoreBall.pause();
+    this.audioScoreBall.currentTime = 0;
+  }
+  
+  if(gameover) this.audioGameover.forEach(function(audio){
+    audio.pause();
+    audio.currentTime = 0;
+  });
+
+  if(star) this.audioStar.forEach(function(audio){
+    audio.pause();
+    audio.currentTime = 0;
+  });
+}
+
 //Drawing functions
 Game.prototype._printScore = function(){
   //prints score of this round
@@ -454,9 +485,11 @@ Game.prototype._restartGame = function(){
   this.patterns = [];
   this.blockPatterns = [];
   this.score = 0;
-  if(!this.patterns) this._generateBlocks();
-  else this._generateBlockPatterns();
-  this._generateScoreBalls();
+  this.lastY = 0;
+  this._generateInitialScenario();
+  // if(!this.patterns) this._generateBlocks();
+  // else this._generateBlockPatterns();
+  // this._generateScoreBalls();
   this.snake.restart();
   this._draw();
 }
@@ -557,10 +590,8 @@ Game.prototype.init = function(){
         if(this.status === 'start')
         {
           this.status = 'normal';
-          if (!this.playingSound) this.playingSound = setTimeout(function(){
-            this.playSound(this.soundStart[0]);
-          }, 1000);
-          // this._restartGame();
+          this.stopAudios(true, true, true, true, true);
+          this.audioStart.play();
         }
         else if(this.status === 'gameover')
         {
@@ -705,11 +736,5 @@ Game.prototype._update = function()
   return;
 }
 
-Game.prototype.gameOverReload = function(){
-  if(this.status === 'gameover')
-  {
-    window.location.reload(true);
-  }
-}
 
 // Game.prototype.generateWall = function(){}

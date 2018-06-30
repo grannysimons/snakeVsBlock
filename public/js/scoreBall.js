@@ -23,5 +23,6 @@ Scoreball.prototype.recalculatePosition = function(){
 }
 
 Scoreball.prototype.setFirstScoreball = function(){
-  this.y = (Math.random() * this.ctx.height)%(this.ctx.height - this.assets.snakeDistanceToLow);
+  // this.y = (Math.random() * this.ctx.height)%(this.ctx.height - this.assets.snakeDistanceToLow);
+  this.y = (Math.random() * this.ctx.height)%this.ctx.height;
 }
