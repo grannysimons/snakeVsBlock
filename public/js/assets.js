@@ -25,8 +25,7 @@ function Assets(){
   this.ARROW_RIGHT = 0;
   this.ARROW_LEFT = 1;
   this.SPACEBAR = 2;
-  this.A = 3;
-  this.ENTER = 4;
+  this.ENTER = 3;
   
   // block
   this.blockWidth = 80;
@@ -44,10 +43,10 @@ function Assets(){
   this.maxPatterns = 1; //max number of patterns to be generated at the same time
 
   // game
-  this.intervalTicks = 0;
-  this.firstIntervalTicks = 1;
+  this.directionTicks = 0;
+  this.firstDirectionTicks = 5;
   this.drawInterval = 5;
-  this.pauseInterval = 100;
+  this.pauseInterval = 20;
   this.gameInterval = 50;
   this.starInterval = 20;
   this.normalInterval = 50;
@@ -55,7 +54,7 @@ function Assets(){
 }
 
 Assets.prototype.calculateVerticalIncrement = function(){
-  (this.snakeVerticalIncrementTurn = this.snakeVerticalIncrementTurn - 0.1 * this.intervalTicks);
+  (this.snakeVerticalIncrementTurn = this.snakeVerticalIncrementTurn - 0.1 * this.directionTicks);
   if(this.snakeVerticalIncrementTurn < 0.5) this.snakeVerticalIncrementTurn = 0.5; 
 }
 Assets.prototype.calculateXincrement = function(x1, dir){
@@ -70,7 +69,7 @@ Assets.prototype.calculateXincrement = function(x1, dir){
   return "error";
 }
 Assets.prototype.calculateVerticalIncrement_FP = function(){
-  (this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurn_FP - 0.1 * this.intervalTicks);
+  (this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurn_FP - 0.1 * this.directionTicks);
   if(this.snakeVerticalIncrementTurn_FP < 0.5) this.snakeVerticalIncrementTurn_FP = 0.5; 
 }
 Assets.prototype.calculateXincrement_FP = function(x1, dir){

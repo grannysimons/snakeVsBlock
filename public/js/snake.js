@@ -31,7 +31,6 @@ Snake.prototype.hasCollidedWithBlock = function(block){
   var horizontalCollision = (head.y - radius - this.assets.toleranceToCollision > block.y) && (head.y - radius - this.assets.toleranceToCollision < block.y + block.height);
   return verticalCollision && horizontalCollision;
 }
-Snake.prototype.gameOver = function(){}
 Snake.prototype.printScore = function(){
   this.ctx.font="10px Arial";
   this.ctx.fillStyle=this.assets.scoreColor;
@@ -49,7 +48,6 @@ Snake.prototype.addBall = function(){
     y: this.body[this.body.length-1].y + 2 * this.assets.snakeBallRadius,
   });
 }
-Snake.prototype.looseBall = function(){}
 Snake.prototype.deleteBall = function(){
   this.body.pop();
 }
@@ -73,10 +71,6 @@ Snake.prototype.moveForward = function(){
   else if(this.body.length === 1)
   {
     this.body[0].y = this.body[0].y - 2 * this.assets.snakeBallRadius;
-  }
-  else
-  {
-    // return;
   }
   this.keepSnakeQuiet(- 2 * this.assets.snakeBallRadius);
 }
@@ -107,7 +101,6 @@ Snake.prototype.moveLeft = function(){
   {
     this.body[0].x = this.body[0].x - 10;
   }
-  // if (this.body[0].x < 0) this.body[0].x = 0;
   if (this.body[0].x - this.assets.snakeBallRadius < 0) this.body[0].x = this.assets.snakeBallRadius;
 }
 Snake.prototype.moveRightFirstPositions = function(){
@@ -180,10 +173,10 @@ Snake.prototype.drawBall = function(ball){
   this.ctx.closePath();
 }
 Snake.prototype.resetVerticalIncrement = function(){
-  this.snakeVerticalIncrementTurn = this.snakeVerticalIncrementTurnInitial;
+  this.snakeVerticalIncrementTurn = this.assets.snakeVerticalIncrementTurnInitial;
 }
 Snake.prototype.resetVerticalIncrement_FP = function(){
-  this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurnInitial_FP;
+  this.snakeVerticalIncrementTurn_FP = this.assets.snakeVerticalIncrementTurnInitial_FP;
 }
 Snake.prototype.restart = function(){
   this.body = [{
@@ -191,5 +184,4 @@ Snake.prototype.restart = function(){
     y: this.ctx.height - this.assets.snakeDistanceToLow,
   }];
   this.score = 1;
-  console.log('restart', this.body);
 }
