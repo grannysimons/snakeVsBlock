@@ -156,6 +156,7 @@ Snake.prototype.moveForwardFirstPositions = function(lastKey){
 }
 Snake.prototype.keepSnakeQuiet = function(incY){
   //baixar-ho tot 2r
+  this.assets.drawInterval = - incY;  //AFEGIT
   this.body.forEach(function(ball){
     ball.y = ball.y - incY;
   }.bind(this));

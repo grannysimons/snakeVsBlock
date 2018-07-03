@@ -155,7 +155,7 @@ function update(){
         }
       });
     }
-    
+
     game._checkCollision();
     if(!game.destroying)
     {
@@ -163,6 +163,7 @@ function update(){
         scoreBall.recalculatePosition();
       });
       game._manageBlocks();
+      game.checkScoreBallsPosition();
     }
   }
   else if(game.status === 'gameover')

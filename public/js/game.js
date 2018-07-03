@@ -7,7 +7,6 @@ function Game(ctx, assets, keyboard){
 
   //status
   this.status = 'start';  //start, gameover, pause, normal
-  // this.lastKeyPressed;
 
   //context
   this.ctx = ctx;
@@ -55,12 +54,8 @@ Game.prototype.init = function(){
   //manages events
   //generates game elements (scoreBalls, blocks)
   //make an initial draw
-
-  // if(!this.gameInterval) this.gameInterval = setInterval(this._update.bind(this), this.assets.gameInterval);
-
   this.assets.directionTicks = 0;
   this._generateInitialScenario();
-  // this._draw();
 }
 Game.prototype._generateInitialScenario = function(){
   this._generateBlockPatterns();
@@ -90,37 +85,38 @@ Game.prototype._generateScoreBalls = function(){
   {
     var scoreBall = new Scoreball(this.assets, this.ctx);
     scoreBall.setFirstScoreball();
-    this._addScoreBallToGame(scoreBall);
+    this.scoreBalls.push(scoreBall);
   }
   if(this.scoreBallsInterval === undefined) this.scoreBallsInterval = setInterval(function(){
     if (this.status != 'normal') return;
     for(var i=0; i<this.assets.maxScoreBalls; i++)
     {
-      // this.scoreBalls.push(new Scoreball(this.assets, this.ctx));
       var scoreBall = new Scoreball(this.assets, this.ctx);
-      this._addScoreBallToGame(scoreBall);
+      this.scoreBalls.push(scoreBall);
     }
   }.bind(this),this.assets.addingScoreBallsPeriod);
 }
-Game.prototype._addScoreBallToGame = function(ball){
-  var invalidPosition = false;
+
+Game.prototype.checkScoreBallsPosition = function()
+{
   var textVerticalSpace = 20;
   this.blockPatterns.forEach(function(blockPattern){
     blockPattern.pattern.forEach(function(block){
-      var horizontalCollision = ((ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision < block.x + block.width) && (ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision > block.x)) ||
-      ((ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision < block.x + block.width) && (ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision > block.x));
-      var verticalCollision = ((ball.y - this.assets.snakeBallRadius - this.assets.toleranceToCollision - textVerticalSpace > block.y) && (ball.y - this.assets.snakeBallRadius - this.assets.toleranceToCollision - textVerticalSpace < block.y + block.height)) ||
-      ((ball.y + this.assets.snakeBallRadius + this.assets.toleranceToCollision > block.y) && (ball.y + this.assets.snakeBallRadius + this.assets.toleranceToCollision < block.y + block.height));
-      var edge = (ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision < 0) || (ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision > this.ctx.width);
-      invalidPosition = (verticalCollision && horizontalCollision) || edge;
+      this.scoreBalls.forEach(function(ball, index){
+        var horizontalCollision = ((ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision < block.x + block.width) && (ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision > block.x)) ||
+        ((ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision < block.x + block.width) && (ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision > block.x));
+        var verticalCollision = ((ball.y - this.assets.snakeBallRadius - this.assets.toleranceToCollision - textVerticalSpace > block.y) && (ball.y - this.assets.snakeBallRadius - this.assets.toleranceToCollision - textVerticalSpace < block.y + block.height)) ||
+        ((ball.y + this.assets.snakeBallRadius + this.assets.toleranceToCollision > block.y) && (ball.y + this.assets.snakeBallRadius + this.assets.toleranceToCollision < block.y + block.height));
+        var edge = (ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision < 0) || (ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision > this.ctx.width);
+        if ((verticalCollision && horizontalCollision) || edge)
+        {
+          this.scoreBalls.splice(index,1);
+        }
+      }.bind(this));
     }.bind(this));
   }.bind(this));
-  if(!invalidPosition)
-  {
-    this.scoreBalls.push(ball);
-  }
-
 }
+
 Game.prototype._generateBlockPatterns = function(){
   // generate maxPatterns block patterns
   for(var i=0; i<this.assets.maxPatterns; i++)
@@ -178,9 +174,7 @@ Game.prototype._checkCollision = function(){
         else if(block.points < this.snake.score)
         {
           this.currentDestroyingBlock = block;
-          console.log('creem destroyingBlockInterval');
           if(!this.destroyingBlockInterval) this.destroyingBlockInterval = setInterval(function(){
-            console.log('dins el setInterval: '+this.destroyingBlockInterval);
             this.snake.score --;
             this.snake.deleteBall();
             this.destroying = true;
@@ -208,56 +202,10 @@ Game.prototype._checkCollision = function(){
                 }.bind(this), this.assets.starColorInterval);
               }
               this.destroying = false;
-              // if(!this.underStarFX)
-              // {
-
-              // }
             }
             
             this.draw();
           }.bind(this), 50);
-
-
-          
-
-          // if(block.hasStar() === true)
-          // {
-          //   this.snake.score -= block.points;
-          //   for(var i=0; i<block.points; i++)
-          //   {
-          //     this.snake.deleteBall();
-          //   }
-          //   this.underStarFX = true;
-          //   if(this.starTimeout === undefined) this.starTimeout = setTimeout(function(){
-          //     this.status = 'normal';
-          //     this.assets.gameInterval = this.assets.normalInterval;
-          //     this.starTimeout = undefined;
-          //     clearInterval(this.starInterval);
-          //     this.starInterval = undefined;
-          //     this.underStarFX = false;
-          //     this.snake.color = this.assets.snakeColorNormal;
-          //   }.bind(this), this.assets.starTime);
-          //   if(this.starInterval === undefined) this.starInterval = setInterval(function(){
-          //     this.snake.color = this.assets.starColors[Math.floor(Math.random() * this.assets.starColors.length)];
-          //   }.bind(this), this.assets.starColorInterval);
-          // }
-          // if(!this.underStarFX)
-          // {
-          //   for(var i=0; i<block.points; i++)
-          //   {
-          //     setTimeout(function(){
-          //       block.points--;
-          //       if (block.points <= 0)
-          //       {
-          //         this._crashFX();
-          //         this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
-          //       }
-          //       this.snake.score --;
-          //       this.snake.deleteBall();
-          //       this.draw();
-          //     }.bind(this), 30 * i);
-          //   }
-          // }
         }
         else
         {
@@ -270,19 +218,7 @@ Game.prototype._checkCollision = function(){
               this.snake.score = 0;
             }
             this.snake.deleteBall();
-            // this._draw();
-
-            // setTimeout(function(){
-            //   this.snake.score --;
-            //   if (this.snake.score < 0)
-            //   {
-            //     this.snake.score = 0;
-            //   }
-            //   this.snake.deleteBall();
-            //   this._draw();
-            // }.bind(this), 100 * i);
           }
-          // this._setGameOver();
           this.status = 'gameover';
           this.stopAudios(true, true, true, true, true);
           var randIndex = Math.floor(Math.random() * this.audioGameover.length);
@@ -294,7 +230,6 @@ Game.prototype._checkCollision = function(){
 
   if(collision === false && this.destroyingBlockInterval)
   {
-    console.log("ja no hi ha colisio!");
     clearInterval(this.destroyingBlockInterval);
     this.destroyingBlockInterval = undefined;
     this.destroying = false;
@@ -333,13 +268,13 @@ Game.prototype._crashFX = function(){
   var x2 = originX;
   var y1 = originY;
   var y2 = originY;
-  var radi = this.assets.snakeBallRadius - 1;
+  var radi = this.assets.snakeBallRadius - 0.3;
   if(!this.crashInterval) this.crashInterval = setInterval(function(){
     x1+=5;
     y1+=5;
     x2-=5;
     y2-=5;
-    radi = radi<=0.6 ? 0 : radi-0.6;
+    radi = radi<=0.3 ? 0 : radi-0.3;
     this.clearCanvas();
     this.draw();
 
@@ -470,18 +405,20 @@ Game.prototype.clearCanvas = function(){
 Game.prototype._adaptVerticalIncrement = function(key){
   //if there has been a change of direction, it resets snake vertical increment
   // if(this.lastKeyPressed != key)
-  if(keyboard.checkNewKeyPressed(key))
-  {
-    this.snake.resetVerticalIncrement();
-  }
+  this.snake.resetVerticalIncrement();
+  // if(keyboard.checkNewKeyPressed(key))
+  // {
+  //   this.snake.resetVerticalIncrement();
+  // }
 }
 Game.prototype._adaptVerticalIncrementFirstPositions = function(key){
   //if there has been a change of direction, it resets snake vertical increment in the first positions
   // if(this.lastKeyPressed != key)
-  if(keyboard.checkNewKeyPressed(key))
-  {
-    this.snake.resetVerticalIncrement_FP();
-  }
+  this.snake.resetVerticalIncrement_FP();
+  // if(keyboard.checkNewKeyPressed(key))
+  // {
+  //   this.snake.resetVerticalIncrement_FP();
+  // }
 }
 Game.prototype.adaptVerticalIncrementCrashing = function(){
   //if there has been a change of direction, it resets snake vertical increment
