@@ -42,6 +42,8 @@ function update(){
     else if(game.status === 'gameover')
     {
       game._restartGame();
+      clearInterval(gameInterval);
+      gameInterval = setInterval(update, assets.gameInterval);
       game.status = 'start';
     }
   }
@@ -53,7 +55,18 @@ function update(){
   else if(game.status === 'normal')
   {
     hideAllScreens();
-    if(!keyboard.anyKeyPressed())
+    if(game.underStarFX)
+    {
+      clearInterval(gameInterval);
+      gameInterval = setInterval(update, this.assets.starInterval);
+    }
+    else
+    {
+      clearInterval(gameInterval);
+      gameInterval = setInterval(update, this.assets.gameInterval);
+    }
+    
+    if(!keyboard.anyKeyPressed() && game.destroying === false)
     {
       if(keyboard.checkNewKeyPressed('nokey')) game.assets.directionTicks = 0;
       keyboard.setKeyPressed('nokey');
@@ -68,7 +81,25 @@ function update(){
       }
       game.assets.directionTicks++;
     }
-    else
+    else if(keyboard.anyKeyPressed() && game.destroying === true)
+    {
+      game.adaptVerticalIncrementCrashing();
+      keyboard.whatWasPressed().forEach(function(value, key){
+        if(value === true)
+        {
+          switch(key)
+          {
+            case assets.ARROW_RIGHT:
+              game.snake.moveRight();
+            break;
+            case assets.ARROW_LEFT:
+            game.snake.moveLeft();
+            break;
+          }
+        }
+      });
+    }
+    else if(game.destroying === false)
     {
       keyboard.whatWasPressed().forEach(function(value, key){
         if(value === true)
@@ -114,17 +145,25 @@ function update(){
                 game.status = 'pause';
                 softPauseKeyOff();
                 softPauseKeyOn();
+                game.stopAudios(true,false,false,true,false);
+                game.audiosPlaying().forEach(function(audio){
+                  audio.pause();
+                });
               }
             break;
           }
         }
       });
     }
+    
     game._checkCollision();
-    game.scoreBalls.forEach(function(scoreBall){
-      scoreBall.recalculatePosition();
-    });
-    game._manageBlocks();
+    if(!game.destroying)
+    {
+      game.scoreBalls.forEach(function(scoreBall){
+        scoreBall.recalculatePosition();
+      });
+      game._manageBlocks();
+    }
   }
   else if(game.status === 'gameover')
   {
@@ -141,6 +180,9 @@ function update(){
       softPauseKeyOn();
       game.status = 'normal';
       game.resumeInterval();
+      game.audiosPlaying().forEach(function(audio){
+        audio.play();
+      });
     }
     else
     {
@@ -148,6 +190,10 @@ function update(){
       game.pauseInterval();
       pauseScreen();
       softPauseKeyOn();
+      game.stopAudios(true,false,false,true,false);
+      game.audiosPlaying().forEach(function(audio){
+        audio.pause();
+      });
     }
   }
   clearCanvas();

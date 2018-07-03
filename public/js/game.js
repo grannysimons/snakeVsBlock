@@ -27,9 +27,11 @@ function Game(ctx, assets, keyboard){
   this.scoreBallsInterval = undefined;
 
   //blocks
-  // this.blocks = [];
   this.blocksInterval = undefined;
   this.crashInterval = undefined;
+  this.destroyingBlockInterval = undefined;
+  this.destroying = false;
+  this.currentDestroyingBlock = undefined;
 
   //blockPatterns
   this.blockPatterns = [];
@@ -65,8 +67,6 @@ Game.prototype._generateInitialScenario = function(){
   this._generateScoreBalls();
 }
 Game.prototype._restartGame = function(){
-  clearInterval(this.gameInterval);
-  this.gameInterval = setInterval(this._update.bind(this), this.assets.gameInterval);
   this.scoreBalls = [];
   this.blockPatterns = [];
   this.score = 0;
@@ -154,61 +154,110 @@ Game.prototype._checkCollision = function(){
     }
   }.bind(this));  
 
+  var collision = false;
   this.blockPatterns.forEach(function(blockPattern, indextBlockPattern){
     blockPattern.pattern.forEach(function(block, indexBlock){
       if(this.snake.hasCollidedWithBlock(block))
       {
+        collision = true;
+        if(this.currentDestroyingBlock != block)
+        {
+          clearInterval(this.destroyingBlockInterval);
+          this.destroyingBlockInterval = undefined;
+        }
         if(this.underStarFX)
         {
           this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
           this._crashFX();
           setTimeout(function(){
-            this.stopAudios(true,false,false,true,true);
+            this.stopAudios(true, false, false, false, false);
             var randIndex = Math.floor(Math.random() * this.audioStar.length);
             this.audioStar[randIndex].play();
-          }.bind(this), 2000);
+          }.bind(this), 3000);
         }
         else if(block.points < this.snake.score)
         {
-          if(block.hasStar() === true)
-          {
-            this.snake.score -= block.points;
-            for(var i=0; i<block.points; i++)
+          this.currentDestroyingBlock = block;
+          console.log('creem destroyingBlockInterval');
+          if(!this.destroyingBlockInterval) this.destroyingBlockInterval = setInterval(function(){
+            console.log('dins el setInterval: '+this.destroyingBlockInterval);
+            this.snake.score --;
+            this.snake.deleteBall();
+            this.destroying = true;
+            block.points--;
+            if (block.points <= 0)
             {
-              this.snake.deleteBall();
-            }
-            this.assets.gameInterval = this.assets.starInterval;
-            clearInterval(this.gameInterval);
-            this.gameInterval = setInterval(this._update.bind(this), this.assets.gameInterval);
-            this.underStarFX = true;
-            if(this.starTimeout === undefined) this.starTimeout = setTimeout(function(){
-              this.assets.gameInterval = this.assets.normalInterval;
-              clearInterval(this.gameInterval);
-              this.gameInterval = setInterval(this._update.bind(this), this.assets.gameInterval);
-              this.starTimeout = undefined;
-              clearInterval(this.starInterval);
-              this.starInterval = undefined;
-              this.underStarFX = false;
-              this.snake.color = this.assets.snakeColorNormal;
-            }.bind(this), this.assets.starTime);
-            if(this.starInterval === undefined) this.starInterval = setInterval(function(){
-              this.snake.color = this.assets.starColors[Math.floor(Math.random() * this.assets.starColors.length)];
-            }.bind(this), this.assets.starColorInterval);
-          }
-          if(!this.underStarFX)
-          {
-            for(var i=0; i<block.points; i++)
-            {
-              setTimeout(function(){
-                this.snake.score --;
-                this.snake.deleteBall();
-                this.draw();
-              }.bind(this), 100 * i);
-            }
-          }
+              clearInterval(this.destroyingBlockInterval);
+              this.destroyingBlockInterval = undefined;
+              this._crashFX();
+              this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
+              if(block.hasStar() === true)
+              {
+                this.underStarFX = true;
+                if(this.starTimeout === undefined) this.starTimeout = setTimeout(function(){
+                  this.status = 'normal';
+                  this.assets.gameInterval = this.assets.normalInterval;
+                  this.starTimeout = undefined;
+                  clearInterval(this.starInterval);
+                  this.starInterval = undefined;
+                  this.underStarFX = false;
+                  this.snake.color = this.assets.snakeColorNormal;
+                }.bind(this), this.assets.starTime);
+                if(this.starInterval === undefined) this.starInterval = setInterval(function(){
+                  this.snake.color = this.assets.starColors[Math.floor(Math.random() * this.assets.starColors.length)];
+                }.bind(this), this.assets.starColorInterval);
+              }
+              this.destroying = false;
+              // if(!this.underStarFX)
+              // {
 
-          this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
-          this._crashFX();
+              // }
+            }
+            
+            this.draw();
+          }.bind(this), 50);
+
+
+          
+
+          // if(block.hasStar() === true)
+          // {
+          //   this.snake.score -= block.points;
+          //   for(var i=0; i<block.points; i++)
+          //   {
+          //     this.snake.deleteBall();
+          //   }
+          //   this.underStarFX = true;
+          //   if(this.starTimeout === undefined) this.starTimeout = setTimeout(function(){
+          //     this.status = 'normal';
+          //     this.assets.gameInterval = this.assets.normalInterval;
+          //     this.starTimeout = undefined;
+          //     clearInterval(this.starInterval);
+          //     this.starInterval = undefined;
+          //     this.underStarFX = false;
+          //     this.snake.color = this.assets.snakeColorNormal;
+          //   }.bind(this), this.assets.starTime);
+          //   if(this.starInterval === undefined) this.starInterval = setInterval(function(){
+          //     this.snake.color = this.assets.starColors[Math.floor(Math.random() * this.assets.starColors.length)];
+          //   }.bind(this), this.assets.starColorInterval);
+          // }
+          // if(!this.underStarFX)
+          // {
+          //   for(var i=0; i<block.points; i++)
+          //   {
+          //     setTimeout(function(){
+          //       block.points--;
+          //       if (block.points <= 0)
+          //       {
+          //         this._crashFX();
+          //         this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
+          //       }
+          //       this.snake.score --;
+          //       this.snake.deleteBall();
+          //       this.draw();
+          //     }.bind(this), 30 * i);
+          //   }
+          // }
         }
         else
         {
@@ -233,7 +282,8 @@ Game.prototype._checkCollision = function(){
             //   this._draw();
             // }.bind(this), 100 * i);
           }
-          this._setGameOver();
+          // this._setGameOver();
+          this.status = 'gameover';
           this.stopAudios(true, true, true, true, true);
           var randIndex = Math.floor(Math.random() * this.audioGameover.length);
           this.audioGameover[randIndex].play();
@@ -241,6 +291,14 @@ Game.prototype._checkCollision = function(){
       }
     }.bind(this));
   }.bind(this));
+
+  if(collision === false && this.destroyingBlockInterval)
+  {
+    console.log("ja no hi ha colisio!");
+    clearInterval(this.destroyingBlockInterval);
+    this.destroyingBlockInterval = undefined;
+    this.destroying = false;
+  }
 }
 Game.prototype._manageBlocks = function(){
   if(this.blockPatterns.length === 0 || (this.blockPatterns.length > 0 && this.blockPatterns[this.blockPatterns.length -1].y > 0))
@@ -266,7 +324,7 @@ Game.prototype._deleteBlocksOutOfCanvas = function(){
   }.bind(this));
 }
 Game.prototype._crashFX = function(){
-  this.stopAudios(false, true, false, true, true);
+  this.stopAudios(false, false, false, false, false);
   this.audioCrash.play();
 
   var originX = this.snake.body[0].x;
@@ -370,7 +428,19 @@ Game.prototype.stopAudios = function(start, crash, score, gameover, star){
     audio.currentTime = 0;
   });
 }
-
+Game.prototype.audiosPlaying = function(){
+  var audiosPlaying = [];
+  if(!this.audioStart.ended) audiosPlaying.push(this.audioStart);
+  if(!this.audioCrash.ended) audiosPlaying.push(this.audioCrash);
+  if(!this.audioScoreBall.ended) audiosPlaying.push(this.audioScoreBall);
+  this.audioGameover.forEach(function(audio){
+    if(!audio.ended) audiosPlaying.push(audio);
+  });
+  this.audioStar.forEach(function(audio){
+    if(!audio.ended) audiosPlaying.push(audio);
+  });
+  return audiosPlaying;
+}
 //Drawing functions
 Game.prototype.draw = function(){
   this.scoreBalls.forEach(function(scoreBall){
@@ -412,6 +482,11 @@ Game.prototype._adaptVerticalIncrementFirstPositions = function(key){
   {
     this.snake.resetVerticalIncrement_FP();
   }
+}
+Game.prototype.adaptVerticalIncrementCrashing = function(){
+  //if there has been a change of direction, it resets snake vertical increment
+  // if(this.lastKeyPressed != key)
+  this.snakeVerticalIncrementTurn = 0;
 }
 
 
