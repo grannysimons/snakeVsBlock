@@ -8,6 +8,17 @@ function Snake(ctx, assets){
   this.score = 1;
   this.color = this.assets.snakeColor;
 }
+
+// general
+Snake.prototype.restart = function(){
+  this.body = [{
+    x: this.ctx.width * 0.5,
+    y: this.ctx.height - this.assets.snakeDistanceToLow,
+  }];
+  this.score = 1;
+}
+
+//check collisions
 Snake.prototype.hasCollidedWithScoreBall = function(scoreBall){
   if(this.body.length === 0) return false;
   var head = this.body[0];
@@ -31,11 +42,27 @@ Snake.prototype.hasCollidedWithBlock = function(block){
   var horizontalCollision = (head.y - radius - this.assets.toleranceToCollision > block.y) && (head.y - radius - this.assets.toleranceToCollision < block.y + block.height);
   return verticalCollision && horizontalCollision;
 }
+
+//drawing
 Snake.prototype.printScore = function(){
   this.ctx.font="10px Arial";
   this.ctx.fillStyle=this.assets.scoreColor;
   if (this.body.length>0) this.ctx.fillText(this.score,this.body[0].x - 3, this.body[0].y - this.assets.snakeBallRadius - 6);
 }
+Snake.prototype.draw = function(){
+  this.body.forEach(function(ball){
+    this.drawBall(ball);
+  }.bind(this));
+}
+Snake.prototype.drawBall = function(ball){
+  this.ctx.beginPath();
+  this.ctx.arc(ball.x, ball.y, this.assets.snakeBallRadius, 0, 2 * Math.PI, false);
+  this.ctx.fillStyle = this.color;
+  this.ctx.fill();
+  this.ctx.closePath();
+}
+
+
 Snake.prototype.addBallToBeginning = function(){
   this.body.unshift({
     x: this.body[0].x,
@@ -51,6 +78,8 @@ Snake.prototype.addBall = function(){
 Snake.prototype.deleteBall = function(){
   this.body.pop();
 }
+
+//movement
 Snake.prototype.move = function (){
   //afegir una bola al principi del this.body amb les característiques de la primera bola
   if(this.body.length === 0) return;
@@ -61,6 +90,7 @@ Snake.prototype.move = function (){
   this.body.pop();
   this.body.unshift(firstBall);
 }
+
 Snake.prototype.moveForward = function(){
   this.move();
   if(this.body.length > 1)
@@ -103,7 +133,11 @@ Snake.prototype.moveLeft = function(){
   }
   if (this.body[0].x - this.assets.snakeBallRadius < 0) this.body[0].x = this.assets.snakeBallRadius;
 }
-Snake.prototype.moveRightFirstPositions = function(){
+Snake.prototype.resetVerticalIncrement = function(){
+  this.snakeVerticalIncrementTurn = this.assets.snakeVerticalIncrementTurnInitial;
+}
+
+Snake.prototype.moveRight_FP = function(){
   this.move();
   if(this.body.length > 1)
   {
@@ -113,10 +147,10 @@ Snake.prototype.moveRightFirstPositions = function(){
   }
   else
   {
-    this.body[0].x = this.body[0].x + 10;
+    this.body[0].x = this.body[0].x + 2*this.assets.snakeBallRadius;
   }
 }
-Snake.prototype.moveLeftFirstPositions = function(){
+Snake.prototype.moveLeft_FP = function(){
   this.move();
   if(this.body.length > 1)
   {
@@ -126,25 +160,30 @@ Snake.prototype.moveLeftFirstPositions = function(){
   }
   else
   {
-    this.body[0].x = this.body[0].x - 10;
+    this.body[0].x = this.body[0].x - 2*this.assets.snakeBallRadius;
   }
 }
-Snake.prototype.moveForwardFirstPositions = function(lastKey){
+Snake.prototype.moveForward_FP = function(lastKey){
   this.move();
   if(this.body.length > 1)
   {
     if (lastKey === 'right')
     {
       this.assets.calculateVerticalIncrement_FP();
-      this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
+      // this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
+      this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'right');
       this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn_FP;
       this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn_FP);
     }
     else if (lastKey === 'left') 
     {
-      this.body[0].x = this.body[1].x + 5;
-      this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn - 5;
-      this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn - 5);
+      // this.body[0].x = this.body[1].x + 5;
+      // this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn - 5;
+      // this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn - 5);
+      this.assets.calculateVerticalIncrement_FP();
+      // this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
+      this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
+      this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn_FP;
     }
     else 
     {
@@ -154,6 +193,10 @@ Snake.prototype.moveForwardFirstPositions = function(lastKey){
     }
   }
 }
+Snake.prototype.resetVerticalIncrement_FP = function(){
+  this.snakeVerticalIncrementTurn_FP = this.assets.snakeVerticalIncrementTurnInitial_FP;
+}
+
 Snake.prototype.keepSnakeQuiet = function(incY){
   //baixar-ho tot 2r
   this.assets.drawInterval = - incY;  //AFEGIT
@@ -161,28 +204,4 @@ Snake.prototype.keepSnakeQuiet = function(incY){
     ball.y = ball.y - incY;
   }.bind(this));
 }
-Snake.prototype.draw = function(){
-  this.body.forEach(function(ball){
-    this.drawBall(ball);
-  }.bind(this));
-}
-Snake.prototype.drawBall = function(ball){
-  this.ctx.beginPath();
-  this.ctx.arc(ball.x, ball.y, this.assets.snakeBallRadius, 0, 2 * Math.PI, false);
-  this.ctx.fillStyle = this.color;
-  this.ctx.fill();
-  this.ctx.closePath();
-}
-Snake.prototype.resetVerticalIncrement = function(){
-  this.snakeVerticalIncrementTurn = this.assets.snakeVerticalIncrementTurnInitial;
-}
-Snake.prototype.resetVerticalIncrement_FP = function(){
-  this.snakeVerticalIncrementTurn_FP = this.assets.snakeVerticalIncrementTurnInitial_FP;
-}
-Snake.prototype.restart = function(){
-  this.body = [{
-    x: this.ctx.width * 0.5,
-    y: this.ctx.height - this.assets.snakeDistanceToLow,
-  }];
-  this.score = 1;
-}
+

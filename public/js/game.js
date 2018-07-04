@@ -62,12 +62,14 @@ Game.prototype._generateInitialScenario = function(){
   this._generateScoreBalls();
 }
 Game.prototype._restartGame = function(){
+
   this.scoreBalls = [];
   this.blockPatterns = [];
   this.score = 0;
   this.lastY = 0;
   this._generateInitialScenario();
   this.snake.restart();
+  this.assets.drawInterval = this.assets.drawIntervalInit;
   // this._draw();
 }
 Game.prototype.pauseInterval = function(){
@@ -250,10 +252,6 @@ Game.prototype._manageBlocks = function(){
 }
 Game.prototype._deleteBlocksOutOfCanvas = function(){
   //deletes blocks out of the canvas
-  // this.blocks.forEach(function(block, index){
-  //   if (block.y > this.ctx.height) this.blocks.splice(index, 1);
-  // }.bind(this));
-  
   this.blockPatterns.forEach(function(blockPattern, index){
     if (blockPattern.y > this.ctx.height) this.blockPatterns.splice(index, 1);
   }.bind(this));
@@ -402,27 +400,8 @@ Game.prototype.clearCanvas = function(){
 }
 
 //Position
-Game.prototype._adaptVerticalIncrement = function(key){
-  //if there has been a change of direction, it resets snake vertical increment
-  // if(this.lastKeyPressed != key)
-  this.snake.resetVerticalIncrement();
-  // if(keyboard.checkNewKeyPressed(key))
-  // {
-  //   this.snake.resetVerticalIncrement();
-  // }
-}
-Game.prototype._adaptVerticalIncrementFirstPositions = function(key){
-  //if there has been a change of direction, it resets snake vertical increment in the first positions
-  // if(this.lastKeyPressed != key)
-  this.snake.resetVerticalIncrement_FP();
-  // if(keyboard.checkNewKeyPressed(key))
-  // {
-  //   this.snake.resetVerticalIncrement_FP();
-  // }
-}
 Game.prototype.adaptVerticalIncrementCrashing = function(){
   //if there has been a change of direction, it resets snake vertical increment
-  // if(this.lastKeyPressed != key)
   this.snakeVerticalIncrementTurn = 0;
 }
 

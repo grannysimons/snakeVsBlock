@@ -29,6 +29,7 @@ function Keyboard(ctx, assets){
       }.bind(this));
 }
 
+//init
 Keyboard.prototype.initKeys = function(){
     this.keys[assets.ARROW_RIGHT] = false;
     this.keys[assets.ARROW_LEFT] = false;
@@ -36,6 +37,7 @@ Keyboard.prototype.initKeys = function(){
     this.keys[assets.ENTER] = false;
 }
 
+//manage pressed keys
 Keyboard.prototype.isRightPressed = function(){
     return this.keys[this.assets.ARROW_RIGHT];
 }
@@ -48,7 +50,6 @@ Keyboard.prototype.isSpacebarPressed = function(){
 Keyboard.prototype.isEnterPressed = function(){
     return this.keys[this.assets.ENTER];
 }
-
 Keyboard.prototype.anyKeyPressed = function(){
     //cheks if any key has been pressed
     var anyKeyPressed = false;
@@ -56,16 +57,16 @@ Keyboard.prototype.anyKeyPressed = function(){
       if (value === true) anyKeyPressed = true;
     });
     return anyKeyPressed;
-  }
-  Keyboard.prototype.setKeyPressed = function(key)
-  {
-    //sets last key pressed
-    game.lastKeyPressed = key;
-  }
-  Keyboard.prototype.checkNewKeyPressed = function(key)
-  {
-    return !(game.lastKeyPressed === key);
-  }
-Keyboard.prototype.whatWasPressed = function(){
+}
+Keyboard.prototype.setKeyPressed = function(key)
+{
+  //sets last key pressed
+  this.lastKeyPressed = key;
+}
+Keyboard.prototype.checkNewKeyPressed = function(key)
+{
+  return !(this.lastKeyPressed === key);
+}
+Keyboard.prototype.getKeysArray = function(){
     return this.keys;
 }

@@ -4,7 +4,7 @@ var game, ctx, assets;
 var keys = [];
 var keyboard;
 //intervals
-var screenInterval, gameInterval, waitingInterval;
+var screenInterval, gameInterval, starInterval, waitingInterval;
 //status
 var intervalPaused = false;
 var gameOver = false;
@@ -22,7 +22,7 @@ window.onload = function(){
 
   if(TEST) setTest();
 
-  screenInterval = setInterval(update, assets.gameInterval);
+  gameInterval = setInterval(update, assets.gameInterval);
 }
 function initVariables(){
   pauseTicks = assets.pauseInterval + 1;
@@ -31,6 +31,7 @@ function initVariables(){
 function update(){
   // function to be executed at every iteration of the main loop
 
+  //manage ENTER key
   if(keyboard.isEnterPressed())
   {
     if(game.status === 'start')
@@ -48,43 +49,50 @@ function update(){
     }
   }
   
+  //manage status
   if(game.status === 'start')
   {
     startScreen();
   }
   else if(game.status === 'normal')
   {
-    hideAllScreens();
+    hideAllScreens(); 
     if(game.underStarFX)
     {
-      clearInterval(gameInterval);
-      gameInterval = setInterval(update, this.assets.starInterval);
+      if(gameInterval)
+      {
+        clearInterval(gameInterval);
+        gameInterval = undefined;
+      }
+      if(!starInterval)
+      {
+        starInterval = setInterval(update, assets.starInterval);
+      }
     }
     else
     {
-      clearInterval(gameInterval);
-      gameInterval = setInterval(update, this.assets.gameInterval);
+      if(starInterval)
+      {
+        clearInterval(starInterval);
+        starInterval = undefined
+      }
+      if(!gameInterval)
+      {
+        gameInterval = setInterval(update, assets.gameInterval);
+      }
     }
     
     if(!keyboard.anyKeyPressed() && game.destroying === false)
     {
-      if(keyboard.checkNewKeyPressed('nokey')) game.assets.directionTicks = 0;
+      resetDirectionTicksFirstTime('nokey');
+      assets.directionTicks < assets.firstDirectionTicks ? game.snake.moveForward_FP(keyboard.lastKeyPressed) : game.snake.moveForward();
       keyboard.setKeyPressed('nokey');
-      if (game.assets.directionTicks < assets.firstDirectionTicks)
-      {
-        // game.snake.moveForwardFirstPositions(lastKeyPressed);
-        game.snake.moveForward();
-      }
-      else
-      {
-        game.snake.moveForward();
-      }
-      game.assets.directionTicks++;
+      assets.directionTicks++;
     }
     else if(keyboard.anyKeyPressed() && game.destroying === true)
     {
       game.adaptVerticalIncrementCrashing();
-      keyboard.whatWasPressed().forEach(function(value, key){
+      keyboard.getKeysArray().forEach(function(value, key){
         if(value === true)
         {
           switch(key)
@@ -101,43 +109,40 @@ function update(){
     }
     else if(game.destroying === false)
     {
-      keyboard.whatWasPressed().forEach(function(value, key){
+      keyboard.getKeysArray().forEach(function(value, key){
         if(value === true)
         {
           switch(key)
           {
             case assets.ARROW_RIGHT:
-              if(keyboard.checkNewKeyPressed('right')) game.assets.directionTicks = 0;
-
-              if (game.assets.directionTicks < assets.firstDirectionTicks)
-              {
-                game._adaptVerticalIncrementFirstPositions('right');
-                game.snake.moveRightFirstPositions();
-                // this.snake.moveRight();
-              }
-              else
-              {
-                game._adaptVerticalIncrement('right');
-                game.snake.moveRight();
-              }
+              resetDirectionTicksFirstTime('right');
               keyboard.setKeyPressed('right');
-              game.assets.directionTicks++;
+              // if (assets.directionTicks < assets.firstDirectionTicks)
+              // {
+              //   game.snake.resetVerticalIncrement_FP();
+              //   game.snake.moveRight_FP();
+              // }
+              // else
+              // {
+                game.snake.resetVerticalIncrement();
+                game.snake.moveRight();
+              // }
+              assets.directionTicks++;
             break;
             case assets.ARROW_LEFT:
-              if(keyboard.checkNewKeyPressed('left')) game.assets.directionTicks = 0;
-                if (game.assets.directionTicks < assets.firstDirectionTicks)
-                {
-                  game._adaptVerticalIncrementFirstPositions('left');
-                  game.snake.moveLeftFirstPositions();
-                  // this.snake.moveLeft();
-                }
-                else 
-                {
-                  game._adaptVerticalIncrement('left');
-                  game.snake.moveLeft();
-                }
-                keyboard.setKeyPressed('left');
-                game.assets.directionTicks++;
+              resetDirectionTicksFirstTime('left');
+              keyboard.setKeyPressed('left');
+              // if (assets.directionTicks < assets.firstDirectionTicks)
+              // {
+              //   game.snake.resetVerticalIncrement_FP();
+              //   game.snake.moveLeft_FP();
+              // }
+              // else 
+              // {
+                game.snake.resetVerticalIncrement();
+                game.snake.moveLeft();
+              // }
+              assets.directionTicks++;
             break;
             case assets.SPACEBAR:
               if(isSoftPauseKeyOff() || pauseTicks > assets.pauseInterval)
@@ -187,7 +192,6 @@ function update(){
     }
     else
     {
-      game._adaptVerticalIncrement('space');
       game.pauseInterval();
       pauseScreen();
       softPauseKeyOn();
@@ -199,6 +203,13 @@ function update(){
   }
   clearCanvas();
   draw();
+}
+
+function resetDirectionTicksFirstTime(direction){
+  if(keyboard.checkNewKeyPressed(direction))
+  {
+    game.assets.directionTicks = 0;
+  }
 }
 
 //Test
