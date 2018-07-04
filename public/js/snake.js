@@ -102,15 +102,16 @@ Snake.prototype.moveForward = function(){
   {
     this.body[0].y = this.body[0].y - 2 * this.assets.snakeBallRadius;
   }
-  this.keepSnakeQuiet(- 2 * this.assets.snakeBallRadius);
+  this.recalculatePosition(- 2 * this.assets.snakeBallRadius);
 }
 Snake.prototype.moveRight = function(){
+  this.assets.snakeVerticalIncrementTurn = this.resetVerticalIncrement();
   this.move();
   if(this.body.length > 1)
   {
     this.body[0].x = this.assets.calculateXincrement(this.body[1].x, 'right');
     this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn;
-    this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn);
+    this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn);
   }
   else if (this.body.length === 1)
   {
@@ -120,12 +121,13 @@ Snake.prototype.moveRight = function(){
   if (this.body[0].x + this.assets.snakeBallRadius > this.ctx.width) this.body[0].x = this.ctx.width - this.assets.snakeBallRadius;
 }
 Snake.prototype.moveLeft = function(){
+  this.assets.snakeVerticalIncrementTurn = this.resetVerticalIncrement();
   this.move();
   if(this.body.length > 1)
   {
     this.body[0].x = this.assets.calculateXincrement(this.body[1].x, 'left');
     this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn;
-    this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn);
+    this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn);
   }
   else if(this.body.length === 1)
   {
@@ -134,16 +136,17 @@ Snake.prototype.moveLeft = function(){
   if (this.body[0].x - this.assets.snakeBallRadius < 0) this.body[0].x = this.assets.snakeBallRadius;
 }
 Snake.prototype.resetVerticalIncrement = function(){
-  this.snakeVerticalIncrementTurn = this.assets.snakeVerticalIncrementTurnInitial;
+  return this.assets.snakeVerticalIncrementTurnInitial;
 }
 
 Snake.prototype.moveRight_FP = function(){
+  this.assets.snakeVerticalIncrementTurn_FP = this.resetVerticalIncrement_FP();
   this.move();
   if(this.body.length > 1)
   {
     this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'right');
     this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn_FP;
-    this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn_FP);
+    this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn_FP);
   }
   else
   {
@@ -151,12 +154,13 @@ Snake.prototype.moveRight_FP = function(){
   }
 }
 Snake.prototype.moveLeft_FP = function(){
+  this.assets.snakeVerticalIncrementTurn_FP = this.resetVerticalIncrement_FP();
   this.move();
   if(this.body.length > 1)
   {
     this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
     this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn_FP;
-    this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn_FP);
+    this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn_FP);
   }
   else
   {
@@ -173,13 +177,13 @@ Snake.prototype.moveForward_FP = function(lastKey){
       // this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
       this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'right');
       this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn_FP;
-      this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn_FP);
+      this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn_FP);
     }
     else if (lastKey === 'left') 
     {
       // this.body[0].x = this.body[1].x + 5;
       // this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn - 5;
-      // this.keepSnakeQuiet(- this.assets.snakeVerticalIncrementTurn - 5);
+      // this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn - 5);
       this.assets.calculateVerticalIncrement_FP();
       // this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
       this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
@@ -189,17 +193,17 @@ Snake.prototype.moveForward_FP = function(lastKey){
     {
       this.body[0].x = this.body[1].x;
       this.body[0].y = this.body[1].y - 2 * this.assets.snakeBallRadius;
-      this.keepSnakeQuiet(- 2 * this.assets.snakeBallRadius);
+      this.recalculatePosition(- 2 * this.assets.snakeBallRadius);
     }
   }
 }
 Snake.prototype.resetVerticalIncrement_FP = function(){
-  this.snakeVerticalIncrementTurn_FP = this.assets.snakeVerticalIncrementTurnInitial_FP;
+  return this.assets.snakeVerticalIncrementTurnInitial_FP;
 }
 
-Snake.prototype.keepSnakeQuiet = function(incY){
-  //baixar-ho tot 2r
-  this.assets.drawInterval = - incY;  //AFEGIT
+Snake.prototype.recalculatePosition = function(incY){
+  //baixar-ho tot l'últim increment vertical de la serp
+  this.assets.drawInterval = - incY;
   this.body.forEach(function(ball){
     ball.y = ball.y - incY;
   }.bind(this));

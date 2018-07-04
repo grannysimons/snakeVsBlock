@@ -52,45 +52,28 @@ function Assets(){
 }
 
 Assets.prototype.calculateVerticalIncrement = function(){
-  (this.snakeVerticalIncrementTurn = this.snakeVerticalIncrementTurn - 0.1 * this.directionTicks);
-  // console.log('directionTicks' + this.directionTicks);
-
+  console.log('normal: '+this.directionTicks);
+  (this.snakeVerticalIncrementTurn = this.snakeVerticalIncrementTurn - 0.6*this.directionTicks);
   if(this.snakeVerticalIncrementTurn < 0.5) this.snakeVerticalIncrementTurn = 0.5; 
 }
 Assets.prototype.calculateXincrement = function(x1, dir){
   this.calculateVerticalIncrement();
-  var result1 = 0.5 * (2 * x1 + Math.sqrt( Math.pow(2*x1,2) - 4 * (Math.pow(this.snakeVerticalIncrementTurn,2) + Math.pow(x1,2) - 4 * Math.pow(this.snakeBallRadius,2))));
-  var result2 = 0.5 * (2 * x1 - Math.sqrt( Math.pow(2*x1,2) - 4 * (Math.pow(this.snakeVerticalIncrementTurn,2) + Math.pow(x1,2) - 4 * Math.pow(this.snakeBallRadius,2))));
-  if(dir === "right")
-  {
-    // console.log('Xincrement' + Math.floor(result1 > x1 ? result1 : result2));
-    return Math.floor(result1 > x1 ? result1 : result2);
-  }
-  else if(dir === "left") 
-  {
-    // console.log('Xincrement' + Math.floor(result1 < x1 ? result1 : result2));
-    return Math.floor(result1 < x1 ? result1 : result2);
-  }
-  return "error";
+  var result = Math.sqrt(4*this.snakeBallRadius*this.snakeBallRadius - this.snakeVerticalIncrementTurn * this.snakeVerticalIncrementTurn);
+  if (dir === 'right') return x1 + result;
+  else if(dir === 'left') return x1 - result;
+  else return "error";
+
 }
 Assets.prototype.calculateVerticalIncrement_FP = function(){
-  (this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurn_FP - 0.1 * this.directionTicks);
-  // console.log('FP: directionTicks' + this.directionTicks);
-  if(this.snakeVerticalIncrementTurn_FP < 0.5) this.snakeVerticalIncrementTurn_FP = 0.5; 
+  console.log('FP: '+this.directionTicks);
+
+  (this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurn_FP - this.directionTicks);
+  if(this.snakeVerticalIncrementTurn_FP < 0.2) this.snakeVerticalIncrementTurn_FP = 0.2; 
 }
 Assets.prototype.calculateXincrement_FP = function(x1, dir){
   this.calculateVerticalIncrement_FP();
-  var result1 = 0.5 * (2 * x1 + Math.sqrt( Math.pow(2*x1,2) - 4 * (Math.pow(this.snakeVerticalIncrementTurn_FP,2) + Math.pow(x1,2) - 4 * Math.pow(this.snakeBallRadius,2))));
-  var result2 = 0.5 * (2 * x1 - Math.sqrt( Math.pow(2*x1,2) - 4 * (Math.pow(this.snakeVerticalIncrementTurn_FP,2) + Math.pow(x1,2) - 4 * Math.pow(this.snakeBallRadius,2))));
-  if(dir === "right")
-  {
-    // console.log('FP: Xincrement' + Math.floor(result1 > x1 ? result1 : result2));
-    return Math.floor(result1 > x1 ? result1 : result2);
-  }
-  else if(dir === "left")
-  {
-    // console.log('FP: Xincrement' + Math.floor(result1 < x1 ? result1 : result2));
-    return Math.floor(result1 < x1 ? result1 : result2);
-  }
-  return "error";
+  var result = Math.sqrt(4*this.snakeBallRadius*this.snakeBallRadius - this.snakeVerticalIncrementTurn_FP * this.snakeVerticalIncrementTurn_FP);
+  if (dir === 'right') return x1 + result;
+  else if(dir === 'left') return x1 - result;
+  else return "error";
 }

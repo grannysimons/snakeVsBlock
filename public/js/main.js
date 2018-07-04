@@ -117,31 +117,29 @@ function update(){
             case assets.ARROW_RIGHT:
               resetDirectionTicksFirstTime('right');
               keyboard.setKeyPressed('right');
-              // if (assets.directionTicks < assets.firstDirectionTicks)
-              // {
-              //   game.snake.resetVerticalIncrement_FP();
-              //   game.snake.moveRight_FP();
-              // }
-              // else
-              // {
-                game.snake.resetVerticalIncrement();
+              if (assets.directionTicks < assets.firstDirectionTicks)
+              {
+                // console.log(assets.directionTicks);
+                game.snake.moveRight_FP();
+              }
+              else
+              {
                 game.snake.moveRight();
-              // }
+              }
               assets.directionTicks++;
             break;
             case assets.ARROW_LEFT:
               resetDirectionTicksFirstTime('left');
               keyboard.setKeyPressed('left');
-              // if (assets.directionTicks < assets.firstDirectionTicks)
-              // {
-              //   game.snake.resetVerticalIncrement_FP();
-              //   game.snake.moveLeft_FP();
-              // }
-              // else 
-              // {
-                game.snake.resetVerticalIncrement();
+              if (assets.directionTicks < assets.firstDirectionTicks)
+              {
+                // console.log(assets.directionTicks);
+                game.snake.moveLeft_FP();
+              }
+              else 
+              {
                 game.snake.moveLeft();
-              // }
+              }
               assets.directionTicks++;
             break;
             case assets.SPACEBAR:
@@ -161,7 +159,7 @@ function update(){
       });
     }
 
-    game._checkCollision();
+    // game._checkCollision();
     if(!game.destroying)
     {
       game.scoreBalls.forEach(function(scoreBall){
@@ -208,7 +206,8 @@ function update(){
 function resetDirectionTicksFirstTime(direction){
   if(keyboard.checkNewKeyPressed(direction))
   {
-    game.assets.directionTicks = 0;
+    assets.directionTicks = 0;
+    // console.log('reinicialitzo els directioTicks!: ' + assets.directionTicks);
   }
 }
 
