@@ -33,9 +33,10 @@ function Assets(){
   this.blockScoreColor = 'black';
   this.starTime = 5000;
   this.maxBlockScores = 30;
+  this.starProbability = 0.3;
 
   // wall
-  this.wallWidth = 8;//15;
+  this.wallWidth = 10;
   this.maxWallPatterns = 1; //max number of patterns to be generated at the same time
 
   //blockPattern and wallPatter
@@ -43,15 +44,13 @@ function Assets(){
   this.distanceMin = 200;
   this.maxPatterns = 1; //max number of patterns to be generated at the same time
 
-
-
   // game
   this.directionTicks = 0;
   this.firstDirectionTicks = 5;
-  this.drawIntervalInit = 5;
+  this.drawIntervalInit = 1;
   this.drawInterval = this.drawIntervalInit;
-  this.pauseInterval = 20;
-  this.gameInterval = 60;
+  this.pauseInterval = 15;
+  this.gameInterval = 50;
   this.starInterval = 30;
   this.normalInterval = 50;
   this.starColorInterval = 40;

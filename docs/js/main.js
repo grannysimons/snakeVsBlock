@@ -132,7 +132,6 @@ function update(){
                 if(this.game.collisionWithWall)
                 {
                   game.snake.moveForward();
-                  console.log("collision with wall: RIGHT");
                 }
                 else game.snake.moveRight_FP();
               }
@@ -151,7 +150,6 @@ function update(){
                 if(this.game.collisionWithWall)
                 {
                   game.snake.moveForward();
-                  console.log("collision with wall: LEFT");
                 }
                 else game.snake.moveLeft_FP();
               }
@@ -169,9 +167,6 @@ function update(){
                 softPauseKeyOff();
                 softPauseKeyOn();
                 game.stopAudios(true,false,false,true,false);
-                game.audiosPlaying().forEach(function(audio){
-                  audio.pause();
-                });
               }
             break;
           }

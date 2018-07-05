@@ -105,20 +105,48 @@ Game.prototype._generateScoreBalls = function(){
 }
 Game.prototype.checkScoreBallsPosition = function()
 {
+  var radius = this.assets.snakeBallRadius;
   var textVerticalSpace = 20;
   this.blockPatterns.forEach(function(blockPattern){
     blockPattern.pattern.forEach(function(block){
       this.scoreBalls.forEach(function(ball, index){
-        var horizontalCollision = ((ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision < block.x + block.width) && (ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision > block.x)) ||
-        ((ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision < block.x + block.width) && (ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision > block.x));
-        var verticalCollision = ((ball.y - this.assets.snakeBallRadius - this.assets.toleranceToCollision - textVerticalSpace > block.y) && (ball.y - this.assets.snakeBallRadius - this.assets.toleranceToCollision - textVerticalSpace < block.y + block.height)) ||
-        ((ball.y + this.assets.snakeBallRadius + this.assets.toleranceToCollision > block.y) && (ball.y + this.assets.snakeBallRadius + this.assets.toleranceToCollision < block.y + block.height));
-        var edge = (ball.x - this.assets.snakeBallRadius - this.assets.toleranceToCollision < 0) || (ball.x + this.assets.snakeBallRadius + this.assets.toleranceToCollision > this.ctx.width);
+        var horizontalCollision = ((ball.x - radius - this.assets.toleranceToCollision < block.x + block.width) && (ball.x - radius - this.assets.toleranceToCollision > block.x)) ||
+        ((ball.x + radius + this.assets.toleranceToCollision < block.x + block.width) && (ball.x + radius + this.assets.toleranceToCollision > block.x));
+        var verticalCollision = ((ball.y - radius - this.assets.toleranceToCollision - textVerticalSpace > block.y) && (ball.y - radius - this.assets.toleranceToCollision - textVerticalSpace < block.y + block.height)) ||
+        ((ball.y + radius + this.assets.toleranceToCollision > block.y) && (ball.y + radius + this.assets.toleranceToCollision < block.y + block.height));
+        var edge = (ball.x - radius - this.assets.toleranceToCollision < 0) || (ball.x + radius + this.assets.toleranceToCollision > this.ctx.width);
         if ((verticalCollision && horizontalCollision) || edge)
         {
           this.scoreBalls.splice(index,1);
         }
       }.bind(this));
+    }.bind(this));
+  }.bind(this));
+
+  this.scoreBalls.forEach(function(ball1){
+    this.scoreBalls.forEach(function(ball2, index){
+      if(ball1 != ball2)
+      {
+        var horizontalCollision = ((ball1.x + radius < ball2.x + radius) && (ball1.x + radius > ball2.x)) ||
+        ((ball2.x + radius < ball1.x + radius) && (ball2.x + radius > ball1.x));
+        var verticalCollision = ((ball1.y - radius > ball2.y - radius) && (ball1.y - radius < ball2.y) )||
+        ((ball2.y - radius > ball1.y - radius) && (ball2.y - radius < ball1.y) );
+        if (verticalCollision && horizontalCollision)
+        {
+          this.scoreBalls.splice(index,1);
+        }
+      }
+    }.bind(this))
+  }.bind(this));
+
+  this.scoreBalls.forEach(function(ball, index){
+    this.wallPatterns.forEach(function(wall){
+      var horizontalCollision = ((ball.x + radius > wall.x) && (ball.x + radius < wall.x + wall.width)) || ((ball.x - radius < wall.x + wall.width) && (ball.x - radius > wall.x));  
+      var verticalCollision = ((ball.y - radius > wall.y) && (ball.y - radius < wall.y + wall.height)) || ((ball.y + radius < wall.y + wall.height) && (ball.y + radius > wall.y));
+      if(verticalCollision && horizontalCollision)
+      {
+        this.scoreBalls.splice(index,1);
+      }
     }.bind(this));
   }.bind(this));
 }
@@ -146,13 +174,13 @@ Game.prototype.checkCollision = function(){
   this.scoreBalls.forEach(function(scoreBall, index){
     if(this.snake.hasCollidedWithScoreBall(scoreBall))
     {
+      this.audioScoreBall.play();
       this.scoreBalls.splice(index,1);
       for(var i=0; i<scoreBall.points; i++)
       {
         this.snake.score ++;
         
         setTimeout(function(){
-          this.audioScoreBall.play();
           this.snake.addBall();
         }.bind(this), 100 * i);
         this.draw();
@@ -184,50 +212,62 @@ Game.prototype.checkCollision = function(){
             this.audioStar[randIndex].play();
           }.bind(this), 3000);
         }
-        else if(block.points < this.snake.score)
-        {
-          this.currentDestroyingBlock = block;
-          if(!this.destroyingBlockInterval) this.destroyingBlockInterval = setInterval(function(){
-            this.snake.score --;
-            this.snake.deleteBall();
-            this.destroying = true;
-            block.points--;
-            if (block.points <= 0)
+        this.currentDestroyingBlock = block;
+        if(!this.destroyingBlockInterval) this.destroyingBlockInterval = setInterval(function(){
+          this.snake.score --;
+          this.snake.deleteBall();
+          this.destroying = true;
+          block.points--;
+          this.draw();
+          if(this.keyboard.isSpacebarPressed())
+          {
+            if(isSoftPauseKeyOff() || pauseTicks > assets.pauseInterval)
             {
               clearInterval(this.destroyingBlockInterval);
               this.destroyingBlockInterval = undefined;
-              this._crashFX();
-              this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
-              if(block.hasStar() === true)
-              {
-                this.underStarFX = true;
-                if(this.starTimeout === undefined) this.starTimeout = setTimeout(function(){
-                  this.status = 'normal';
-                  this.assets.gameInterval = this.assets.normalInterval;
-                  this.starTimeout = undefined;
-                  clearInterval(this.starInterval);
-                  this.starInterval = undefined;
-                  this.underStarFX = false;
-                  this.snake.color = this.assets.snakeColorNormal;
-                }.bind(this), this.assets.starTime);
-                if(this.starInterval === undefined) this.starInterval = setInterval(function(){
-                  this.snake.color = this.assets.starColors[Math.floor(Math.random() * this.assets.starColors.length)];
-                }.bind(this), this.assets.starColorInterval);
-              }
-              this.destroying = false;
+              game.status = 'pause';
+              softPauseKeyOff();
+              softPauseKeyOn();
+              game.stopAudios(true,false,false,true,false);
             }
-            
-            this.draw();
-          }.bind(this), 50);
-        }
-        else
-        {
-          this.pauseInterval();
-          this.status = 'gameover';
-          this.stopAudios(true, true, true, true, true);
-          var randIndex = Math.floor(Math.random() * this.audioGameover.length);
-          this.audioGameover[randIndex].play();
-        }
+          }
+          //breaking block
+          if (block.points <= 0 && this.snake.score > 0)
+          {
+            clearInterval(this.destroyingBlockInterval);
+            this.destroyingBlockInterval = undefined;
+            this._crashFX();
+            this.blockPatterns[indextBlockPattern].pattern[indexBlock] = false;
+            if(block.hasStar() === true)
+            {
+              this.underStarFX = true;
+              if(this.starTimeout === undefined) this.starTimeout = setTimeout(function(){
+                this.status = 'normal';
+                this.assets.gameInterval = this.assets.normalInterval;
+                this.starTimeout = undefined;
+                clearInterval(this.starInterval);
+                this.starInterval = undefined;
+                this.underStarFX = false;
+                this.snake.color = this.assets.snakeColorNormal;
+              }.bind(this), this.assets.starTime);
+              if(this.starInterval === undefined) this.starInterval = setInterval(function(){
+                this.snake.color = this.assets.starColors[Math.floor(Math.random() * this.assets.starColors.length)];
+              }.bind(this), this.assets.starColorInterval);
+            }
+            this.destroying = false;
+          }
+          //breaking snake
+          else if(block.points >= 0 && this.snake.score <= 0)
+          {
+            clearInterval(this.destroyingBlockInterval);
+            this.destroyingBlockInterval = undefined;
+            this.pauseInterval();
+            this.status = 'gameover';
+            this.stopAudios(true, true, true, true, true);
+            var randIndex = Math.floor(Math.random() * this.audioGameover.length);
+            this.audioGameover[randIndex].play();
+          }
+        }.bind(this), 50);
       }
     }.bind(this));
   }.bind(this));
@@ -239,7 +279,6 @@ Game.prototype.checkCollision = function(){
       {
         var head = this.snake.body[0];
         var radius = this.assets.snakeBallRadius;
-        console.log(this.keyboard.keys);
         if(this.keyboard.isRightPressed())
         {
           this.snake.body[0].x = wall.x - radius; 
@@ -303,7 +342,7 @@ Game.prototype._crashFX = function(){
   var x2 = originX;
   var y1 = originY;
   var y2 = originY;
-  var radi = this.assets.snakeBallRadius - 0.3;
+  var radi = this.assets.snakeBallRadius;
   if(!this.crashInterval) this.crashInterval = setInterval(function(){
     x1+=5;
     y1+=5;
@@ -400,17 +439,18 @@ Game.prototype.stopAudios = function(start, crash, score, gameover, star){
 }
 Game.prototype.audiosPlaying = function(){
   var audiosPlaying = [];
-  if(!this.audioStart.ended) audiosPlaying.push(this.audioStart);
-  if(!this.audioCrash.ended) audiosPlaying.push(this.audioCrash);
-  if(!this.audioScoreBall.ended) audiosPlaying.push(this.audioScoreBall);
+  if(this.audioStart.currentTime != 0) audiosPlaying.push(this.audioStart);
+  if(this.audioCrash.currentTime != 0) audiosPlaying.push(this.audioCrash);
+  if(this.audioScoreBall.currentTime != 0) audiosPlaying.push(this.audioScoreBall);
   this.audioGameover.forEach(function(audio){
-    if(!audio.ended) audiosPlaying.push(audio);
+    if(audio.currentTime != 0) audiosPlaying.push(audio);
   });
   this.audioStar.forEach(function(audio){
-    if(!audio.ended) audiosPlaying.push(audio);
+    if(audio.currentTime != 0) audiosPlaying.push(audio);
   });
   return audiosPlaying;
 }
+
 //Drawing functions
 Game.prototype.draw = function(){
   this.wallPatterns.forEach(function(wall){

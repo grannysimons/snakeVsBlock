@@ -9,12 +9,12 @@ function Block(assets, ctx)
   this.borderRadius = 10;
   this.points = Math.floor(Math.random() * this.assets.maxBlockScores) + 1;
   this.color = this.assets.blockColors[Math.floor(Math.random() * this.assets.blockColors.length)];
-  this.star = (Math.random() > 0.4) ? true : false;
+  this.star = (Math.random() > this.starProbability) ? true : false;
 }
 
 Block.prototype.draw = function(){
   this.ctx.beginPath();
-  this.ctx.moveTo(this.x, this.y);
+  this.ctx.moveTo(this.x + this.borderRadius, this.y);
   this.ctx.arcTo(this.x + this.width, this.y, this.x + this.width, this.y + this.borderRadius, this.borderRadius);
   this.ctx.arcTo(this.x + this.width, this.y + this.height, this.x + this.width - this.borderRadius, this.y + this.height, this.borderRadius);
   this.ctx.arcTo(this.x, this.y + this.height, this.x, this.y + this.height - this.borderRadius, this.borderRadius);
