@@ -3,7 +3,7 @@ function BlockPattern(assets, ctx){
     this.ctx = ctx;
     this.pattern = [];
     this.numBlocks = 10;
-    this.numHoles = Math.floor(Math.random() * 7);
+    this.numHoles = Math.floor(Math.random() * 7) + 3;
     this.y = 100;
 }
 
@@ -20,20 +20,19 @@ BlockPattern.prototype.generatePatternAt = function(posY, userScore){
         var newBlock = new Block(this.assets, this.ctx);
         this.pattern.push(newBlock);
     }
-    this._setUserScoreToBlock(this.pattern[this.numHoles], Math.floor(Math.random() * userScore));
-    this._setUserScoreToBlock(this.pattern[this.numHoles + 1], Math.floor(Math.random() * userScore));
+    this._setUserScoreToBlock(this.pattern[this.numHoles], Math.floor(Math.random() * (userScore > 5 ? userScore - 5 : userScore)));
+    if(this.pattern.length > this.numHoles+1) this._setUserScoreToBlock(this.pattern[this.numHoles + 1], Math.floor(Math.random() * (userScore > 5 ? userScore - 5 : userScore)));
     this.pattern = this._shuffle(this.pattern);
 
     for(var i = 0; i < this.pattern.length; i++)
     {
         if(typeof(this.pattern[i]) === 'object') this.pattern[i].setPosition(i * this.pattern[i].width, this.y);
     }
+    return distance;
 }
-
 BlockPattern.prototype._setUserScoreToBlock = function(block, score){
     block.score = score;
 }
-
 BlockPattern.prototype.move = function(){
     for(var i = 0; i<this.pattern.length; i++)
     {
@@ -43,7 +42,6 @@ BlockPattern.prototype.move = function(){
         }
     }
 }
-
 BlockPattern.prototype.draw = function(){
     for(var i = 0; i<this.pattern.length; i++)
     {
@@ -54,7 +52,6 @@ BlockPattern.prototype.draw = function(){
         }
     }
 }
-
 BlockPattern.prototype.recalculatePosition = function(){
     for(var i = 0; i<this.pattern.length; i++)
     {
@@ -65,7 +62,6 @@ BlockPattern.prototype.recalculatePosition = function(){
         }
     }
 }
-
 BlockPattern.prototype._shuffle = function(array)
 {
     let ctr = array.length;

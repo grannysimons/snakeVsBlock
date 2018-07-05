@@ -1,10 +1,12 @@
-var TEST = true;
 var game, ctx, assets;
+
 //keyboard
 var keys = [];
 var keyboard;
+
 //intervals
 var screenInterval, gameInterval, starInterval, waitingInterval;
+
 //status
 var intervalPaused = false;
 var gameOver = false;
@@ -20,12 +22,14 @@ window.onload = function(){
 
   initVariables();
 
-  if(TEST) setTest();
+  if(assets.TEST) setTest();
 
   gameInterval = setInterval(update, assets.gameInterval);
 }
+
 function initVariables(){
   pauseTicks = assets.pauseInterval + 1;
+  WALLS = this.assets.WALLS;
   this.keyboard.initKeys();
 }
 function update(){
@@ -42,7 +46,7 @@ function update(){
     }
     else if(game.status === 'gameover')
     {
-      game._restartGame();
+      game.restartGame();
       clearInterval(gameInterval);
       gameInterval = setInterval(update, assets.gameInterval);
       game.status = 'start';
@@ -56,7 +60,10 @@ function update(){
   }
   else if(game.status === 'normal')
   {
+    //hide all screens (game over, start or pause screen)
     hideAllScreens(); 
+
+    //check if the snake has eaten a star
     if(game.underStarFX)
     {
       if(gameInterval)
@@ -82,6 +89,7 @@ function update(){
       }
     }
     
+    //if no key was pressed and no blocks are being destroied
     if(!keyboard.anyKeyPressed() && game.destroying === false)
     {
       resetDirectionTicksFirstTime('noKey');
@@ -89,6 +97,7 @@ function update(){
       keyboard.setKeyPressed('noKey');
       assets.directionTicks++;
     }
+    //if a key was pressed (right or left) and a block was being destroied.
     else if(keyboard.anyKeyPressed() && game.destroying === true)
     {
       game.adaptVerticalIncrementCrashing();
@@ -107,7 +116,8 @@ function update(){
         }
       });
     }
-    else if(game.destroying === false)
+    //if a key was pressed and no blocks were being destroied
+    else if(keyboard.anyKeyPressed() && game.destroying === false)
     {
       keyboard.getKeysArray().forEach(function(value, key){
         if(value === true)
@@ -119,11 +129,17 @@ function update(){
               keyboard.setKeyPressed('right');
               if (assets.directionTicks < assets.firstDirectionTicks)
               {
-                game.snake.moveRight_FP();
+                if(this.game.collisionWithWall)
+                {
+                  game.snake.moveForward();
+                  console.log("collision with wall: RIGHT");
+                }
+                else game.snake.moveRight_FP();
               }
               else
               {
-                game.snake.moveRight();
+                if(this.game.collisionWithWall) game.snake.moveForward();
+                else game.snake.moveRight();
               }
               assets.directionTicks++;
             break;
@@ -132,11 +148,17 @@ function update(){
               keyboard.setKeyPressed('left');
               if (assets.directionTicks < assets.firstDirectionTicks)
               {
-                game.snake.moveLeft_FP();
+                if(this.game.collisionWithWall)
+                {
+                  game.snake.moveForward();
+                  console.log("collision with wall: LEFT");
+                }
+                else game.snake.moveLeft_FP();
               }
               else 
               {
-                game.snake.moveLeft();
+                if(this.game.collisionWithWall) game.snake.moveForward();
+                else game.snake.moveLeft();
               }
               assets.directionTicks++;
             break;
@@ -157,13 +179,14 @@ function update(){
       });
     }
 
-    game._checkCollision();
+    game.checkCollision();
     if(!game.destroying)
     {
       game.scoreBalls.forEach(function(scoreBall){
         scoreBall.recalculatePosition();
       });
-      game._manageBlocks();
+      game.manageBlocks();
+      if(this.assets.WALLS) game.manageWalls();
       game.checkScoreBallsPosition();
     }
   }
@@ -200,7 +223,6 @@ function update(){
   clearCanvas();
   draw();
 }
-
 function resetDirectionTicksFirstTime(direction){
   if(keyboard.checkNewKeyPressed(direction))
   {
@@ -230,6 +252,7 @@ function draw(){
   game.draw();
   game.printScore();
 }
+
 //pause and game over
 function pauseScreen(){
   hideAllScreens();

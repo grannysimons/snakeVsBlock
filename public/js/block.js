@@ -47,10 +47,6 @@ Block.prototype.setPosition = function(x, y){
   this.x = x;
   this.y = y;
 }
-Block.prototype.isOutOfScreen = function(){
-  if(this.y > this.ctx.height) return true;
-  else return false;
-}
 Block.prototype.hasStar = function(){
   return this.star;
 }

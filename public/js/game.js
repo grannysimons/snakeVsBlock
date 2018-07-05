@@ -26,7 +26,6 @@ function Game(ctx, assets, keyboard){
   this.scoreBallsInterval = undefined;
 
   //blocks
-  this.blocksInterval = undefined;
   this.crashInterval = undefined;
   this.destroyingBlockInterval = undefined;
   this.destroying = false;
@@ -34,7 +33,12 @@ function Game(ctx, assets, keyboard){
 
   //blockPatterns
   this.blockPatterns = [];
-  this.lastY = 0;
+  this.lastY = -200;
+  this.lastDistance = 0;
+
+  //wallPatterns
+  this.wallPatterns = [];
+  this.collisionWithWall = false;
 
   //score
   this.maxScore = 0;
@@ -58,15 +62,15 @@ Game.prototype.init = function(){
   this._generateInitialScenario();
 }
 Game.prototype._generateInitialScenario = function(){
-  this._generateBlockPatterns();
+  this._generatePatterns();
   this._generateScoreBalls();
 }
-Game.prototype._restartGame = function(){
+Game.prototype.restartGame = function(){
   this.destroying = false;
   this.scoreBalls = [];
   this.blockPatterns = [];
   this.score = 0;
-  this.lastY = 0;
+  this.lastY = -200;
   this._generateInitialScenario();
   this.snake.restart();
   this.assets.drawInterval = this.assets.drawIntervalInit;
@@ -80,6 +84,7 @@ Game.prototype.resumeInterval = function(){
   //resumes the main setInterval (resumes the loop)
   game.intervalPaused = false;
 }
+
 //Generate and manage game elements
 Game.prototype._generateScoreBalls = function(){
   //fills the array this.scoreBalls
@@ -98,7 +103,6 @@ Game.prototype._generateScoreBalls = function(){
     }
   }.bind(this),this.assets.addingScoreBallsPeriod);
 }
-
 Game.prototype.checkScoreBallsPosition = function()
 {
   var textVerticalSpace = 20;
@@ -118,20 +122,27 @@ Game.prototype.checkScoreBallsPosition = function()
     }.bind(this));
   }.bind(this));
 }
-
-Game.prototype._generateBlockPatterns = function(){
+Game.prototype._generatePatterns = function(){
   // generate maxPatterns block patterns
   for(var i=0; i<this.assets.maxPatterns; i++)
   {
     var blockPat = new BlockPattern(this.assets, this.ctx);
-    blockPat.generatePatternAt(this.lastY, this.snake.score);
+    this.lastDistance = blockPat.generatePatternAt(this.lastY, this.snake.score);
     this.blockPatterns.push(blockPat);
-    this.lastY = blockPat.y;
+    
+    if(this.assets.WALLS)
+    {
+      var wallPat = new WallPattern(this.assets, this.ctx);
+      wallPat.generateWallAt(this.lastY, this.lastDistance);
+      this.wallPatterns.push(wallPat);
+      this.lastY = blockPat.y;
+    }
   }
 }
-Game.prototype._checkCollision = function(){
+Game.prototype.checkCollision = function(){
   //collision with balls + add balls
   //collision with blocks + delete balls
+  //collision with walls + stop ball from moving out of it
   this.scoreBalls.forEach(function(scoreBall, index){
     if(this.snake.hasCollidedWithScoreBall(scoreBall))
     {
@@ -212,20 +223,34 @@ Game.prototype._checkCollision = function(){
         else
         {
           this.pauseInterval();
-          for(var i=0; i<block.points; i++)
-          {
-            this.snake.score --;
-            if (this.snake.score < 0)
-            {
-              this.snake.score = 0;
-            }
-            this.snake.deleteBall();
-          }
           this.status = 'gameover';
           this.stopAudios(true, true, true, true, true);
           var randIndex = Math.floor(Math.random() * this.audioGameover.length);
           this.audioGameover[randIndex].play();
         }
+      }
+    }.bind(this));
+  }.bind(this));
+
+  this.collisionWithWall = false;
+  this.wallPatterns.forEach(function(pattern){
+    pattern.pattern.forEach(function(wall){
+      if(this.snake.hasCollidedWithWall(wall))
+      {
+        var head = this.snake.body[0];
+        var radius = this.assets.snakeBallRadius;
+        console.log(this.keyboard.keys);
+        if(this.keyboard.isRightPressed())
+        {
+          this.snake.body[0].x = wall.x - radius; 
+        }
+        else if(this.keyboard.isLeftPressed())        
+        {
+          this.snake.body[0].x = wall.x + wall.width + radius; 
+        }
+        this.collisionWithWall = true;
+        this.clearCanvas();
+        this.draw();
       }
     }.bind(this));
   }.bind(this));
@@ -237,23 +262,35 @@ Game.prototype._checkCollision = function(){
     this.destroying = false;
   }
 }
-Game.prototype._manageBlocks = function(){
+Game.prototype.manageBlocks = function(){
   if(this.blockPatterns.length === 0 || (this.blockPatterns.length > 0 && this.blockPatterns[this.blockPatterns.length -1].y > 0))
   {
-    this._generateBlockPatterns();
+    this._generatePatterns();
   } 
   for (var i=0; i<this.blockPatterns.length; i++)
   {
     this.blockPatterns[i].recalculatePosition();
   }
   if (this.blockPatterns.length > 0) this.lastY = this.blockPatterns[this.blockPatterns.length - 1].y;
-  else if(this.blockPatterns.length === 1) this.lasty = this.blockPatterns[0].y;
   this._deleteBlocksOutOfCanvas();
+}
+Game.prototype.manageWalls = function(){
+  for (var i=0; i<this.wallPatterns.length; i++)
+  {
+    this.wallPatterns[i].recalculatePosition();
+  }
+  this._deleteWallsOutOfCanvas();
 }
 Game.prototype._deleteBlocksOutOfCanvas = function(){
   //deletes blocks out of the canvas
   this.blockPatterns.forEach(function(blockPattern, index){
     if (blockPattern.y > this.ctx.height) this.blockPatterns.splice(index, 1);
+  }.bind(this));
+}
+Game.prototype._deleteWallsOutOfCanvas = function(){
+  //deletes blocks out of the canvas
+  this.wallPatterns.forEach(function(wallPattern, index){
+    if (wallPattern.y > this.ctx.height) this.wallPatterns.splice(index, 1);
   }.bind(this));
 }
 Game.prototype._crashFX = function(){
@@ -376,6 +413,10 @@ Game.prototype.audiosPlaying = function(){
 }
 //Drawing functions
 Game.prototype.draw = function(){
+  this.wallPatterns.forEach(function(wall){
+    wall.draw();
+  });
+  
   this.scoreBalls.forEach(function(scoreBall){
     // scoreBall.recalculatePosition();
     scoreBall.draw();
@@ -404,7 +445,3 @@ Game.prototype.adaptVerticalIncrementCrashing = function(){
   //if there has been a change of direction, it resets snake vertical increment
   this.snakeVerticalIncrementTurn = 0;
 }
-
-
-
-// Game.prototype.generateWall = function(){}

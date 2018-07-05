@@ -17,11 +17,9 @@ Scoreball.prototype.draw = function(){
   this.ctx.fillStyle=this.assets.scoreColor;
   this.ctx.fillText(this.points,this.x - 3, this.y - this.assets.snakeBallRadius - 6);
 }
-
 Scoreball.prototype.recalculatePosition = function(){
     this.y += this.assets.drawInterval;
 }
-
 Scoreball.prototype.setFirstScoreball = function(){
   // this.y = (Math.random() * this.ctx.height)%(this.ctx.height - this.assets.snakeDistanceToLow);
   this.y = (Math.random() * this.ctx.height)%this.ctx.height;
