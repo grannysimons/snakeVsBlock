@@ -62,7 +62,7 @@ Game.prototype._generateInitialScenario = function(){
   this._generateScoreBalls();
 }
 Game.prototype._restartGame = function(){
-
+  this.destroying = false;
   this.scoreBalls = [];
   this.blockPatterns = [];
   this.score = 0;
@@ -380,13 +380,13 @@ Game.prototype.draw = function(){
     // scoreBall.recalculatePosition();
     scoreBall.draw();
   });
- 
-  this.snake.printScore(); 
-  this.snake.draw();
 
   this.blockPatterns.forEach(function(pattern){
     pattern.draw();
   });
+ 
+  this.snake.printScore(); 
+  this.snake.draw();
 }
 Game.prototype.printScore = function(){
   //prints score of this round

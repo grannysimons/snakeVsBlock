@@ -39,7 +39,7 @@ Snake.prototype.hasCollidedWithBlock = function(block){
   var radius = this.assets.snakeBallRadius;
   var verticalCollision = (((head.x + radius + this.assets.toleranceToCollision > block.x) && (head.x + radius + this.assets.toleranceToCollision< block.x + block.width)) || 
   ((head.x - radius - this.assets.toleranceToCollision < block.x + block.width) && (head.x - radius - this.assets.toleranceToCollision > block.x)));
-  var horizontalCollision = (head.y - radius - this.assets.toleranceToCollision > block.y) && (head.y - radius - this.assets.toleranceToCollision < block.y + block.height);
+  var horizontalCollision = (head.y - radius > block.y) && (head.y - radius < block.y + block.height);
   return verticalCollision && horizontalCollision;
 }
 
@@ -70,6 +70,7 @@ Snake.prototype.addBallToBeginning = function(){
   });
 }
 Snake.prototype.addBall = function(){
+  if(this.body.length < 1) return;
   this.body.push({
     x: this.body[this.body.length-1].x,
     y: this.body[this.body.length-1].y + 2 * this.assets.snakeBallRadius,
@@ -115,8 +116,9 @@ Snake.prototype.moveRight = function(){
   }
   else if (this.body.length === 1)
   {
-    this.body[0].x = this.body[0].x + 10;
-    // this.body[0].y = this.body[0].y - 2 * this.assets.snakeBallRadius;
+    this.body[0].x = this.assets.calculateXincrement(this.body[0].x, 'right');
+    this.body[0].y = this.body[0].y - this.assets.snakeVerticalIncrementTurn;
+    this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn);
   }
   if (this.body[0].x + this.assets.snakeBallRadius > this.ctx.width) this.body[0].x = this.ctx.width - this.assets.snakeBallRadius;
 }
@@ -131,7 +133,9 @@ Snake.prototype.moveLeft = function(){
   }
   else if(this.body.length === 1)
   {
-    this.body[0].x = this.body[0].x - 10;
+    this.body[0].x = this.assets.calculateXincrement(this.body[0].x, 'left');
+    this.body[0].y = this.body[0].y - this.assets.snakeVerticalIncrementTurn;
+    this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn);
   }
   if (this.body[0].x - this.assets.snakeBallRadius < 0) this.body[0].x = this.assets.snakeBallRadius;
 }
@@ -150,7 +154,10 @@ Snake.prototype.moveRight_FP = function(){
   }
   else
   {
-    this.body[0].x = this.body[0].x + 2*this.assets.snakeBallRadius;
+    this.body[0].x = this.body[0].x + 3;
+    this.body[0].y = this.body[0].y - this.assets.snakeVerticalIncrementTurn_FP;
+    this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn_FP);
+    // this.body[0].x = this.body[0].x + 2*this.assets.snakeBallRadius;
   }
 }
 Snake.prototype.moveLeft_FP = function(){
@@ -164,37 +171,47 @@ Snake.prototype.moveLeft_FP = function(){
   }
   else
   {
-    this.body[0].x = this.body[0].x - 2*this.assets.snakeBallRadius;
+    this.body[0].x = this.body[0].x - 3;
+    this.body[0].y = this.body[0].y - this.assets.snakeVerticalIncrementTurn_FP;
+    this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn_FP);
   }
 }
 Snake.prototype.moveForward_FP = function(lastKey){
+  // this.moveForward();
+  // return;
   this.move();
   if(this.body.length > 1)
   {
-    if (lastKey === 'right')
+    // this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'forward', lastKey);
+    // this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn_FP;
+    
+    var incrementX = 7;
+    var incrementY = Math.sqrt(4*this.assets.snakeBallRadius*this.assets.snakeBallRadius - incrementX*incrementX);
+    switch(lastKey)
     {
-      this.assets.calculateVerticalIncrement_FP();
-      // this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
-      this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'right');
-      this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn_FP;
-      this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn_FP);
+      case 'right':
+        this.body[0].x = this.body[1].x + incrementX;
+        this.body[0].y = this.body[1].y - incrementY;
+        this.recalculatePosition(- incrementY);
+      console.log('provando');
+      break;
+      case 'left':
+        this.body[0].x = this.body[1].x - incrementX;
+        this.body[0].y = this.body[1].y - incrementY;
+        this.recalculatePosition(- incrementY);
+      break;
+      default:
+        this.body[0].x = this.body[1].x;
+        this.body[0].y = this.body[1].y - 2*this.assets.snakeBallRadius;
+        this.recalculatePosition(- 2*this.assets.snakeBallRadius);
+      break;
     }
-    else if (lastKey === 'left') 
-    {
-      // this.body[0].x = this.body[1].x + 5;
-      // this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn - 5;
-      // this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn - 5);
-      this.assets.calculateVerticalIncrement_FP();
-      // this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
-      this.body[0].x = this.assets.calculateXincrement_FP(this.body[1].x, 'left');
-      this.body[0].y = this.body[1].y - this.assets.snakeVerticalIncrementTurn_FP;
-    }
-    else 
-    {
-      this.body[0].x = this.body[1].x;
-      this.body[0].y = this.body[1].y - 2 * this.assets.snakeBallRadius;
-      this.recalculatePosition(- 2 * this.assets.snakeBallRadius);
-    }
+  }
+  else if(this.body.length === 1)
+  {
+    this.body[0].x = this.assets.calculateXincrement_FP(this.body[0].x, 'forward', lastKey);
+    this.body[0].y = this.body[0].y - this.assets.snakeVerticalIncrementTurn_FP;
+    this.recalculatePosition(- this.assets.snakeVerticalIncrementTurn_FP);
   }
 }
 Snake.prototype.resetVerticalIncrement_FP = function(){

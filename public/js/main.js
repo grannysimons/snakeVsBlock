@@ -84,9 +84,9 @@ function update(){
     
     if(!keyboard.anyKeyPressed() && game.destroying === false)
     {
-      resetDirectionTicksFirstTime('nokey');
+      resetDirectionTicksFirstTime('noKey');
       assets.directionTicks < assets.firstDirectionTicks ? game.snake.moveForward_FP(keyboard.lastKeyPressed) : game.snake.moveForward();
-      keyboard.setKeyPressed('nokey');
+      keyboard.setKeyPressed('noKey');
       assets.directionTicks++;
     }
     else if(keyboard.anyKeyPressed() && game.destroying === true)
@@ -119,7 +119,6 @@ function update(){
               keyboard.setKeyPressed('right');
               if (assets.directionTicks < assets.firstDirectionTicks)
               {
-                // console.log(assets.directionTicks);
                 game.snake.moveRight_FP();
               }
               else
@@ -133,7 +132,6 @@ function update(){
               keyboard.setKeyPressed('left');
               if (assets.directionTicks < assets.firstDirectionTicks)
               {
-                // console.log(assets.directionTicks);
                 game.snake.moveLeft_FP();
               }
               else 
@@ -159,7 +157,7 @@ function update(){
       });
     }
 
-    // game._checkCollision();
+    game._checkCollision();
     if(!game.destroying)
     {
       game.scoreBalls.forEach(function(scoreBall){
@@ -207,7 +205,6 @@ function resetDirectionTicksFirstTime(direction){
   if(keyboard.checkNewKeyPressed(direction))
   {
     assets.directionTicks = 0;
-    // console.log('reinicialitzo els directioTicks!: ' + assets.directionTicks);
   }
 }
 

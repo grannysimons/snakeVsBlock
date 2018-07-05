@@ -52,7 +52,6 @@ function Assets(){
 }
 
 Assets.prototype.calculateVerticalIncrement = function(){
-  console.log('normal: '+this.directionTicks);
   (this.snakeVerticalIncrementTurn = this.snakeVerticalIncrementTurn - 0.6*this.directionTicks);
   if(this.snakeVerticalIncrementTurn < 0.5) this.snakeVerticalIncrementTurn = 0.5; 
 }
@@ -65,15 +64,22 @@ Assets.prototype.calculateXincrement = function(x1, dir){
 
 }
 Assets.prototype.calculateVerticalIncrement_FP = function(){
-  console.log('FP: '+this.directionTicks);
 
   (this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurn_FP - this.directionTicks);
   if(this.snakeVerticalIncrementTurn_FP < 0.2) this.snakeVerticalIncrementTurn_FP = 0.2; 
 }
-Assets.prototype.calculateXincrement_FP = function(x1, dir){
+Assets.prototype.calculateXincrement_FP = function(x1, dir, comesFrom){
   this.calculateVerticalIncrement_FP();
   var result = Math.sqrt(4*this.snakeBallRadius*this.snakeBallRadius - this.snakeVerticalIncrementTurn_FP * this.snakeVerticalIncrementTurn_FP);
-  if (dir === 'right') return x1 + result;
-  else if(dir === 'left') return x1 - result;
-  else return "error";
+  if (dir === 'right' || (dir === 'forward' && comesFrom === 'left')) return x1 + result;
+  else if(dir === 'left' || (dir === 'forward' && comesFrom === 'right')) return x1 - result;
+  else if(dir === 'forward' && (!comesFrom || comesFrom === 'noKey')) return x1;
+  else
+  {
+    return "error";
+  }
+}
+Assets.prototype.calculateVerticalIncrementForward_FP = function(){
+  (this.snakeVerticalIncrementTurn_FP = this.snakeVerticalIncrementTurn_FP - 0.2*this.directionTicks);
+  if(this.snakeVerticalIncrementTurn_FP < 0.2) this.snakeVerticalIncrementTurn_FP = 0.2; 
 }
