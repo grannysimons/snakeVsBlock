@@ -9,7 +9,7 @@ function Block(assets, ctx)
   this.borderRadius = 10;
   this.points = Math.floor(Math.random() * this.assets.maxBlockScores) + 1;
   this.color = this.assets.blockColors[Math.floor(Math.random() * this.assets.blockColors.length)];
-  this.star = (Math.random() > this.starProbability) ? true : false;
+  this.star = (Math.random() > this.assets.starProbability) ? true : false;
 }
 
 Block.prototype.draw = function(){

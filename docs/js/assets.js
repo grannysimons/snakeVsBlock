@@ -28,7 +28,7 @@ function Assets(){
   
   // block
   this.blockWidth = 80;
-  this.blockHeight = 60;
+  this.blockHeight = 70;
   this.blockColors = ['#24ffad', '#71ff5d', '#f5fe5f', '#ff5138', '#27fef1', '#ff9445'];
   this.blockScoreColor = 'black';
   this.starTime = 5000;
@@ -47,7 +47,7 @@ function Assets(){
   // game
   this.directionTicks = 0;
   this.firstDirectionTicks = 5;
-  this.drawIntervalInit = 1;
+  this.drawIntervalInit = 3;
   this.drawInterval = this.drawIntervalInit;
   this.pauseInterval = 15;
   this.gameInterval = 50;
